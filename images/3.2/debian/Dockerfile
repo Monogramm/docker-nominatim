@@ -1,4 +1,4 @@
-FROM mediagis/nominatim:3.2.1
+FROM mediagis/nominatim:3.2
 
 ENV NOMINATIM_INIT_THREADS= \
     GEOFABRIK_DOWNLOAD_URL= \
@@ -26,7 +26,7 @@ VOLUME /data
 # Arguments to label built container
 ARG VCS_REF
 ARG BUILD_DATE
-ARG VERSION=3.2.1
+ARG VERSION=3.2
 
 # Keep track of image version
 RUN set -ex; \
