@@ -47,17 +47,10 @@ notifications:
   email: false
 
 env: # Environments
-    - VERSION=2.5 VARIANT=alpine
     - VERSION=2.5 VARIANT=debian
-    - VERSION=3.0 VARIANT=alpine
     - VERSION=3.0 VARIANT=debian
-    - VERSION=3.1 VARIANT=alpine
     - VERSION=3.1 VARIANT=debian
-    - VERSION=3.2 VARIANT=alpine
     - VERSION=3.2 VARIANT=debian
-    - VERSION=3.3 VARIANT=alpine
     - VERSION=3.3 VARIANT=debian
-    - VERSION=3.4 VARIANT=alpine
     - VERSION=3.4 VARIANT=debian
-    - VERSION=3.5 VARIANT=alpine
     - VERSION=3.5 VARIANT=debian

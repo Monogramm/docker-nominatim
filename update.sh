@@ -13,7 +13,7 @@ declare -A base=(
 
 variants=(
 	debian
-	alpine
+	#alpine
 )
 
 min_version='2.5'

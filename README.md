@@ -23,8 +23,13 @@ Open Source search based on OpenStreetMap data
 
 [Dockerhub monogramm/docker-nominatim](https://hub.docker.com/r/monogramm/docker-nominatim/)
 
--   `alpine` `latest`
--   `debian`
+-   `3.5` `latest`
+-   `3.4`
+-   `3.3`
+-   `3.2`
+-   `3.1`
+-   `3.0`
+-   `2.5`
 
 ## How to run this image
 

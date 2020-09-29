@@ -1,4 +1,4 @@
-FROM mediagis/nominatim-docker:2.5.1
+FROM mediagis/nominatim:2.5.1
 
 ENV NOMINATIM_INIT_THREADS= \
     GEOFABRIK_DOWNLOAD_URL= \
