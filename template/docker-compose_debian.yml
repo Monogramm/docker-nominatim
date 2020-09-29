@@ -13,7 +13,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       nominatim-db:
-        condition: service_healthy
+        condition: service_started
       nominatim:
         condition: service_started
     networks:
@@ -40,7 +40,8 @@ services:
     #restart: always
     depends_on:
       nominatim-db:
-        condition: service_healthy
+        condition: service_started
+        #condition: service_healthy
     links:
       - nominatim-db
     expose:
@@ -76,8 +77,8 @@ services:
       - '5432'
     #ports:
     #  - "5432:5432"
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${NOMINATIM_DB_USER}", "-d", "${NOMINATIM_DB_NAME}"]
+    #healthcheck:
+    #  test: ["CMD", "pg_isready", "-U", "${NOMINATIM_DB_USER}", "-d", "${NOMINATIM_DB_NAME}"]
     networks:
       - nominatim_internal_network
     volumes:
