@@ -1,65 +1,69 @@
-<!--
-
-Template variables to replace in ALL files:
-* __app_name__: Name of the application
-* __app_owner_slug__: GitHub Owner of the original application
-* __app_slug__: GitHub slug of the original application
-* __app_uppercase_slug__: Uppercase value of the GitHub slug
-* __app_description__: Application description
-* __app_url__: Application URL
-* __app_vendor_name__: Name of the Application vendor
-
-After replacing all variables:
-* Edit `update.sh` to edit how to retrieve the application latest versions and how to generate images
-* Edit `template/docker-compose_*.yml` to configure your Docker environment for CI
-* Edit `template/test` content for DockerHub custom tests
-
--->
-
 [![License: AGPL v3][uri_license_image]][uri_license]
-[![Docs](https://img.shields.io/badge/Docs-Github%20Pages-blue)](https://monogramm.github.io/__app_slug__/)
-[![Build Status](https://travis-ci.org/Monogramm/docker-__app_slug__.svg)](https://travis-ci.org/Monogramm/docker-__app_slug__)
-[![Docker Automated buid](https://img.shields.io/docker/cloud/build/monogramm/docker-__app_slug__.svg)](https://hub.docker.com/r/monogramm/docker-__app_slug__/)
-[![Docker Pulls](https://img.shields.io/docker/pulls/monogramm/docker-__app_slug__.svg)](https://hub.docker.com/r/monogramm/docker-__app_slug__/)
-[![Docker Version](https://images.microbadger.com/badges/version/monogramm/docker-__app_slug__.svg)](https://microbadger.com/images/monogramm/docker-__app_slug__)
-[![Docker Size](https://images.microbadger.com/badges/image/monogramm/docker-__app_slug__.svg)](https://microbadger.com/images/monogramm/docker-__app_slug__)
-[![GitHub stars](https://img.shields.io/github/stars/Monogramm/docker-__app_slug__?style=social)](https://github.com/Monogramm/docker-__app_slug__)
+[![Docs](https://img.shields.io/badge/Docs-Github%20Pages-blue)](https://monogramm.github.io/docker-nominatim/)
+[![Build Status](https://travis-ci.org/Monogramm/docker-nominatim.svg)](https://travis-ci.org/Monogramm/docker-nominatim)
+[![Docker Automated buid](https://img.shields.io/docker/cloud/build/monogramm/docker-nominatim.svg)](https://hub.docker.com/r/monogramm/docker-nominatim/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/monogramm/docker-nominatim.svg)](https://hub.docker.com/r/monogramm/docker-nominatim/)
+[![Docker Version](https://images.microbadger.com/badges/version/monogramm/docker-nominatim.svg)](https://microbadger.com/images/monogramm/docker-nominatim)
+[![Docker Size](https://images.microbadger.com/badges/image/monogramm/docker-nominatim.svg)](https://microbadger.com/images/monogramm/docker-nominatim)
+[![GitHub stars](https://img.shields.io/github/stars/Monogramm/docker-nominatim?style=social)](https://github.com/Monogramm/docker-nominatim)
 
-# **__app_name__** Docker image
+# **Nominatim** Docker image
 
-Docker image for **__app_name__**.
+Docker image for **Nominatim**.
 
 :construction: **This image is still in development!**
 
-## What is **__app_name__**
+## What is **Nominatim**
 
-__app_description__
+Open Source search based on OpenStreetMap data
 
-> [**__app_name__**](__app_url__)
+> [**Nominatim**](https://nominatim.org/)
 
 ## Supported tags
 
-[Dockerhub monogramm/docker-__app_slug__](https://hub.docker.com/r/monogramm/docker-__app_slug__/)
+[Dockerhub monogramm/docker-nominatim](https://hub.docker.com/r/monogramm/docker-nominatim/)
 
 -   `alpine` `latest`
 -   `debian`
 
 ## How to run this image
 
-<!--
-    If based on official images, refer to official doc:
+This image provides an NOMINATIM Manager in the form of the Docker entrypoint.
+It manages map downloads from Geofabrik and NOMINATIM extraction/pre-processing/routing based on environment variables.
 
-See **__app_name__** base image documentation for details.
+```shell
+# Number of threads used during Nominatim DB init (leave empty to use all CPU)
+NOMINATIM_INIT_THREADS=2
 
-> [**__app_name__** GitHub](https://github.com/__app_owner_slug__/__app_slug__)
+## Geofabrik URL to download map
+GEOFABRIK_DOWNLOAD_URL=http://download.geofabrik.de/europe/monaco-latest.osm.pbf
 
-> [**__app_name__** DockerHub](https://hub.docker.com/r/__app_owner_slug__/docker-__app_slug__-base/)
+## Geofabrik URL to update map
+GEOFABRIK_REPLICATION_URL=http://download.geofabrik.de/europe/monaco-updates
 
--->
+## Geofabrik map relative file path
+NOMINATIM_MAP_PATH=monaco-latest.osm.pbf
+
+## Nominatim Postgres relative directory
+NOMINATIM_DB_PATH=monaco-latest-postgres
+
+```
+
+See **Nominatim** base image documentation for details.
+
+> [**Nominatim Docker** GitHub](https://github.com/mediagis/nominatim-docker)
+
+> [**Nominatim** DockerHub](https://hub.docker.com/r/mediagis/nominatim/)
+
+See **Nominatim** documentation for details.
+
+> [**Nominatim** GitHub](https://github.com/osm-search/Nominatim)
+
+> [**Nominatim** WebSite](https://nominatim.org/)
 
 ## Questions / Issues
 
-If you got any questions or problems using the image, please visit our [Github Repository](https://github.com/Monogramm/docker-__app_slug__) and write an issue.
+If you got any questions or problems using the image, please visit our [Github Repository](https://github.com/Monogramm/docker-nominatim) and write an issue.
 
 
 [uri_license]: http://www.gnu.org/licenses/agpl.html
