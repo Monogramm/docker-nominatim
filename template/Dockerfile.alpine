@@ -16,9 +16,7 @@ COPY ./entrypoint.sh /
 
 # Add requirements and install application
 RUN set -ex; \
-    chmod +x /entrypoint.sh; \
-    addgroup -S nominatim; \
-    adduser -D -G nominatim nominatim
+    chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["start"]

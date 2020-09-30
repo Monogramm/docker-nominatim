@@ -18,10 +18,7 @@ RUN set -ex; \
     apt-get install -y --allow-unauthenticated \
         netcat \
     ; \
-    rm -rf /var/lib/apt/lists/*; \
-    useradd --uid 5001 --create-home nominatim; \
-    mkdir -p /data; \
-    chown -R nominatim:nominatim /data
+    rm -rf /var/lib/apt/lists/*
 
 COPY ./entrypoint.sh /
 
