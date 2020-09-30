@@ -73,7 +73,7 @@ services:
   nominatim-db:
     image: monogramm/docker-nominatim:ci
     container_name: nominatim-db
-    restart: always
+    #restart: always
     expose:
       - '5432'
     #ports:
