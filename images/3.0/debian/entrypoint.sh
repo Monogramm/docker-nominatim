@@ -192,8 +192,6 @@ init_version() {
 
 # start application
 start() {
-    init
-
     if [ -z "${NOMINATIM_DB_HOST}" || "${NOMINATIM_DB_HOST}" = 'localhost' ]; then
         init_postgres
         init_config
