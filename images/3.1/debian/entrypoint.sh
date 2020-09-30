@@ -124,6 +124,15 @@ init_postgres() {
         sh /app/init.sh "/data/${NOMINATIM_MAP_NAME}" "${NOMINATIM_DB_PATH}" "${NOMINATIM_INIT_THREADS:-$(nproc)}"
         log "Import of OSM map into database finished."
     fi
+
+    if [ -d "/data/${NOMINATIM_DB_PATH}" ]; then
+        # FIXME Dirty hack to get pgsql major version directory
+        PGSQL_MAJOR_VERSION=$(psql --version | grep -oP '[0-9]*\.[0-9]+' | head -n 1 | cut -d. -f 1)
+
+        log "Link OSM database to Postgres ${PGSQL_MAJOR_VERSION} main directory..."
+        ln -s "/data/${NOMINATIM_DB_PATH}" "/var/lib/postgresql/${PGSQL_MAJOR_VERSION}/main"
+        log "Link OSM database to Postgres ${PGSQL_MAJOR_VERSION} main directory finished."
+    fi
 }
 
 # init Nominatim config
