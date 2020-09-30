@@ -47,7 +47,7 @@ GEOFABRIK_DOWNLOAD_URL=http://download.geofabrik.de/europe/monaco-latest.osm.pbf
 GEOFABRIK_REPLICATION_URL=http://download.geofabrik.de/europe/monaco-updates
 
 ## Geofabrik map relative file path
-NOMINATIM_MAP_PATH=monaco-latest.osm.pbf
+NOMINATIM_MAP_NAME=monaco-latest.osm.pbf
 
 ## Nominatim Postgres relative directory
 NOMINATIM_DB_PATH=monaco-latest-postgres

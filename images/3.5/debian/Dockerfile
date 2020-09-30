@@ -3,8 +3,8 @@ FROM mediagis/nominatim:3.5
 ENV NOMINATIM_INIT_THREADS= \
     GEOFABRIK_DOWNLOAD_URL= \
     GEOFABRIK_REPLICATION_URL= \
-    NOMINATIM_MAP_PATH=/data/nominatim.osm.pbf \
-    NOMINATIM_DB_PATH=/data/postgres \
+    NOMINATIM_MAP_NAME=nominatim.osm.pbf \
+    NOMINATIM_DB_PATH=nominatim-postgres \
     NOMINATIM_DB_DRIVER=pgsql \
     NOMINATIM_DB_HOST=localhost \
     NOMINATIM_DB_PORT=5432 \

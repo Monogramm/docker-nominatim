@@ -97,7 +97,7 @@ wait_for_services() {
 
 # init OSM database
 init_postgres() {
-    if [ -z "${NOMINATIM_MAP_PATH}" ]; then
+    if [ -z "${NOMINATIM_MAP_NAME}" ]; then
         log "Missing path to OSM map!"
         exit 1
     fi
@@ -106,22 +106,22 @@ init_postgres() {
         exit 1
     fi
 
-    if [ ! -f "/data/${NOMINATIM_MAP_PATH}" ]; then
+    if [ ! -f "/data/${NOMINATIM_MAP_NAME}" ]; then
         if [ -z "${GEOFABRIK_DOWNLOAD_URL}" ]; then
-            log "Missing file path to wait for!"
+            log "Missing download URL!"
             exit 1
         fi
 
-        log "Starting download of OSM map..."
+        log "Starting download of OSM map '${NOMINATIM_MAP_NAME}'..."
         curl -q -L \
-            -o "/data/${NOMINATIM_MAP_PATH}" \
+            -o "/data/${NOMINATIM_MAP_NAME}" \
             "${GEOFABRIK_DOWNLOAD_URL}"
-        log "Download OSM map '${OSRM_MAP_NAME}' finished."
+        log "Download OSM map '${NOMINATIM_MAP_NAME}' finished."
     fi
 
     if [ ! -d "/data/${NOMINATIM_DB_PATH}" ]; then
         log "Starting import of OSM map into database (this may take hours or days)..."
-        sh /app/init.sh "/data/${NOMINATIM_MAP_PATH}" "${NOMINATIM_DB_PATH}" "${NOMINATIM_INIT_THREADS:-$(nproc)}"
+        sh /app/init.sh "/data/${NOMINATIM_MAP_NAME}" "${NOMINATIM_DB_PATH}" "${NOMINATIM_INIT_THREADS:-$(nproc)}"
         log "Import of OSM map into database finished."
     fi
 }

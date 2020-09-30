@@ -87,6 +87,6 @@ services:
       - /etc/timezone:/etc/timezone:ro
     environment:
       #- NOMINATIM_INIT_THREADS=4
-      - NOMINATIM_MAP_PATH=monaco-latest.osm.pbf
+      - NOMINATIM_MAP_NAME=monaco-latest.osm.pbf
       - NOMINATIM_DB_PATH=monaco-latest-postgres
       - GEOFABRIK_DOWNLOAD_URL=http://download.geofabrik.de/europe/monaco-latest.osm.pbf
