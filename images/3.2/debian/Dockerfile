@@ -12,9 +12,17 @@ ENV NOMINATIM_INIT_THREADS= \
     NOMINATIM_DB_USER= \
     NOMINATIM_DB_PASSWD=
 
+# Add requirements and install application
+RUN set -ex; \
+    apt-get update; \
+    apt-get install -y --allow-unauthenticated \
+        net-tools \
+    ; \
+    rm -rf /var/lib/apt/lists/*
+
 COPY ./entrypoint.sh /
 
-# Add requirements and install application
+# Update entrypoint permissions
 RUN set -ex; \
     chmod +x /entrypoint.sh
 
