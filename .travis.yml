@@ -27,7 +27,7 @@ before_script:
   - docker images
   # FIXME Manually download OSM map
   - sudo mkdir -p '/srv/nominatim/data/'
-  - wget -O '/srv/nominatim/data/monaco-latest.osm.pbf' 'http://download.geofabrik.de/europe/monaco-latest.osm.pbf'
+  - sudo wget -O '/srv/nominatim/data/monaco-latest.osm.pbf' 'http://download.geofabrik.de/europe/monaco-latest.osm.pbf'
 
 script:
   - cd "$dir"
