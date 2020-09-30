@@ -10,7 +10,7 @@ branches:
     - master
     - develop
 
-before_script:
+before_install:
   - env | sort
   - dir="images/${VERSION}/${VARIANT}"
   - export TAG=travis
@@ -18,11 +18,18 @@ before_script:
   - export BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
   - export IMAGE_NAME=docker-nominatim
 
-script:
+install:
   - cd "$dir"
   # Test containers build
   - docker-compose -f docker-compose.test.yml build
+
+before_script:
   - docker images
+  # FIXME Manually download OSM map
+  - wget -O '/srv/nominatim/data/monaco-latest.osm.pbf' 'http://download.geofabrik.de/europe/monaco-latest.osm.pbf'
+
+script:
+  - cd "$dir"
   # Test containers run
   - travis_retry docker-compose -f docker-compose.test.yml up -d
   - docker-compose -f docker-compose.test.yml logs -f "sut"
