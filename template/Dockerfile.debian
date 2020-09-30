@@ -19,7 +19,7 @@ RUN set -ex; \
     chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["--help"]
+CMD ["start"]
 
 VOLUME /data
 
