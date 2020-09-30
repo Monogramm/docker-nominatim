@@ -113,7 +113,6 @@ init_postgres() {
         fi
 
         log "Starting download of OSM map..."
-        wget -O "/data/${NOMINATIM_MAP_PATH}" "${GEOFABRIK_DOWNLOAD_URL}"
         curl -q -L \
             -o "/data/${NOMINATIM_MAP_PATH}" \
             "${GEOFABRIK_DOWNLOAD_URL}"
