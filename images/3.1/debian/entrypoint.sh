@@ -97,16 +97,12 @@ wait_for_services() {
 
 # init OSM database
 init_postgres() {
-    if [ -z "${NOMINATIM_MAP_NAME}" ]; then
-        log "Missing path to OSM map!"
-        exit 1
-    fi
     if [ -z "${NOMINATIM_DB_PATH}" ]; then
         log "Missing path to OSM database!"
         exit 1
     fi
 
-    if [ ! -f "/data/${NOMINATIM_MAP_NAME}" ]; then
+    if [ -n "${NOMINATIM_MAP_NAME}" ] && [ ! -f "/data/${NOMINATIM_MAP_NAME}" ]; then
         if [ -z "${GEOFABRIK_DOWNLOAD_URL}" ]; then
             log "Missing download URL!"
             exit 1
@@ -204,20 +200,20 @@ init_version() {
 
 # start application
 start() {
-    if [ -z "${NOMINATIM_DB_HOST}" ] || [ "${NOMINATIM_DB_HOST}" = 'localhost' ]; then
+    if [ -n "${NOMINATIM_DB_PATH}" ] && [ "${NOMINATIM_DB_HOST}" = 'localhost' ]; then
         init_postgres
         init_config
         init_version
         startstandalone
     else
-        if [ -z "${NOMINATIM_DB_HOST}" ]; then
-            init_postgres
-            init_version
-            startpostgres
-        else
+        if [ -z "${NOMINATIM_DB_PATH}" ]; then
             init_config
             init_version
             startapache
+        else
+            init_postgres
+            init_version
+            startpostgres
         fi
     fi
 }
