@@ -14,11 +14,14 @@ ENV NOMINATIM_INIT_THREADS= \
 
 # Add requirements and install application
 RUN set -ex; \
-    apt-get update; \
+    apt-get update -q; \
     apt-get install -y --allow-unauthenticated \
-        net-tools \
+        netcat \
     ; \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/*; \
+    useradd --uid 5001 --create-home nominatim; \
+    mkdir -p /data; \
+    chown -R nominatim:nominatim /data
 
 COPY ./entrypoint.sh /
 
