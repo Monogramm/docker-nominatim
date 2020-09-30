@@ -142,7 +142,7 @@ init_config() {
             '/data/local.php'
     fi
 
-    if [ -z "${NOMINATIM_DB_HOST}" || "${NOMINATIM_DB_HOST}" = 'localhost' ]; then
+    if [ -z "${NOMINATIM_DB_HOST}" ] || [ "${NOMINATIM_DB_HOST}" = 'localhost' ]; then
         log "Removing Nominatim Database DSN..."
         sed -i \
             -e "s|^@define('CONST_Database_DSN', '.*');.*|//@define('CONST_Database_DSN', '');|g" \
@@ -192,7 +192,7 @@ init_version() {
 
 # start application
 start() {
-    if [ -z "${NOMINATIM_DB_HOST}" || "${NOMINATIM_DB_HOST}" = 'localhost' ]; then
+    if [ -z "${NOMINATIM_DB_HOST}" ] || [ "${NOMINATIM_DB_HOST}" = 'localhost' ]; then
         init_postgres
         init_config
         init_version
