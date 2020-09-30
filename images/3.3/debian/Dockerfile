@@ -16,6 +16,7 @@ ENV NOMINATIM_INIT_THREADS= \
 RUN set -ex; \
     apt-get update -q; \
     apt-get install -y --allow-unauthenticated \
+        curl \
         netcat \
     ; \
     rm -rf /var/lib/apt/lists/*

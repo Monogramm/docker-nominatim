@@ -114,12 +114,16 @@ init_postgres() {
 
         log "Starting download of OSM map..."
         wget -O "/data/${NOMINATIM_MAP_PATH}" "${GEOFABRIK_DOWNLOAD_URL}"
+        curl -q -L \
+            -o "/data/${NOMINATIM_MAP_PATH}" \
+            "${GEOFABRIK_DOWNLOAD_URL}"
+        log "Download OSM map '${OSRM_MAP_NAME}' finished."
     fi
 
     if [ ! -d "/data/${NOMINATIM_DB_PATH}" ]; then
         log "Starting import of OSM map into database (this may take hours or days)..."
         sh /app/init.sh "/data/${NOMINATIM_MAP_PATH}" "${NOMINATIM_DB_PATH}" "${NOMINATIM_INIT_THREADS:-$(nproc)}"
-        log "Import of OSM map into database successful."
+        log "Import of OSM map into database finished."
     fi
 }
 
