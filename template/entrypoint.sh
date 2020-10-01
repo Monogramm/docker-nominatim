@@ -165,16 +165,26 @@ init_config() {
 }
 
 startstandalone() {
+    init_postgres
+    init_config
+    init_version
+
     log "Starting Nominatim as a single node..."
     bash /app/start.sh
 }
 
 startpostgres() {
+    init_postgres
+    init_version
+
     log "Starting Nominatim Database..."
     sh /app/startpostgres.sh
 }
 
 startapache() {
+    init_config
+    init_version
+
     wait_for_service "${NOMINATIM_DB_HOST}" "${NOMINATIM_DB_PORT}" "${WAIT_STEP}" "${WAIT_TIMEOUT}"
 
     log "Starting Nominatim REST service..."
@@ -201,18 +211,11 @@ init_version() {
 # start application
 start() {
     if [ -n "${NOMINATIM_DB_PATH}" ] && [ "${NOMINATIM_DB_HOST}" = 'localhost' ]; then
-        init_postgres
-        init_config
-        init_version
         startstandalone
     else
         if [ -z "${NOMINATIM_DB_PATH}" ]; then
-            init_config
-            init_version
             startapache
         else
-            init_postgres
-            init_version
             startpostgres
         fi
     fi
@@ -226,7 +229,10 @@ Usage:
 docker exec  <option> [arguments]
 
 Options:
-    start                     Start main service with init of database
+    start                     Start Nominatim based on env vars
+    startstandalone           Start Nominatim as a standalone container
+    startapache               Start Nominatim REST service
+    startpostgres             Start Nominatim Postgres service
     --help                    Displays this help
     <command>                 Run an arbitrary command
 "
@@ -241,5 +247,8 @@ case "${1}" in
 "--help") print_help ;;
     # Service tasks
 "start") start ;;
+"startstandalone") startstandalone ;;
+"startapache") startapache ;;
+"startpostgres") startpostgres ;;
 *) exec "$@" ;;
 esac

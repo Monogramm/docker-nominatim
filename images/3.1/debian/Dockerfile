@@ -18,8 +18,8 @@ RUN set -ex; \
     apt-get install -y --allow-unauthenticated \
         curl \
         netcat \
-    ; \
-    rm -rf /var/lib/apt/lists/*
+        wget \
+    ;
 
 COPY ./entrypoint.sh /
 

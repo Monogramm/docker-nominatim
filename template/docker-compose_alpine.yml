@@ -35,11 +35,10 @@ services:
         - TAG=${TAG}
         - VCS_REF=${VCS_REF}
         - BUILD_DATE=${BUILD_DATE}
-    image: monogramm/docker-nominatim:ci
-    # For production, download prebuilt image
-    #image: ${IMAGE_NAME}
+    image: ${IMAGE_NAME}
     container_name: nominatim
     #restart: always
+    command: startapache
     depends_on:
       nominatim-db:
         condition: service_started
@@ -71,13 +70,14 @@ services:
       - NOMINATIM_DB_PASSWORD=$NOMINATIM_DB_PASSWD
 
   nominatim-db:
-    image: monogramm/docker-nominatim:ci
+    image: ${IMAGE_NAME}
     container_name: nominatim-db
     #restart: always
     expose:
       - '5432'
     #ports:
     #  - "5432:5432"
+    command: startpostgres
     #healthcheck:
     #  test: ["CMD", "pg_isready", "-U", "${NOMINATIM_DB_USER}", "-d", "${NOMINATIM_DB_NAME}"]
     networks:
@@ -100,6 +100,12 @@ services:
       - "80:80"
       # If you need SSL connection
       # - "443:443"
+    healthcheck:
+      test: curl --fail http://127.0.0.1:80/status.php | grep -q -e 'OK' || exit 1
+      interval: 60s
+      timeout: 10s
+      #start_period: 5s
+      retries: 4
     networks:
       - nominatim_internal_network
       - nominatim_external_network

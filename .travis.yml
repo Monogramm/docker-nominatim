@@ -17,7 +17,7 @@ before_install:
   - export TAG=travis
   - export VCS_REF=`git rev-parse --short HEAD`
   - export BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
-  - export IMAGE_NAME=docker-nominatim
+  - export IMAGE_NAME=monogramm/docker-nominatim:travis-ci
 
 install:
   - cd "$dir"

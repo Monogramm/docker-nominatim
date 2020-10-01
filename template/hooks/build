@@ -3,6 +3,9 @@
 # See documentation for details:
 # https://docs.docker.com/docker-hub/builds/advanced/
 
+# FIXME Manually download OSM map
+wget -O '/srv/nominatim/data/monaco-latest.osm.pbf' 'http://download.geofabrik.de/europe/monaco-latest.osm.pbf'
+
 docker build \
     --build-arg TAG="${DOCKER_TAG}" \
     --build-arg VCS_REF=`git rev-parse --short HEAD` \
