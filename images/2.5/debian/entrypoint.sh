@@ -141,24 +141,24 @@ init_config() {
     if [ -z "${GEOFABRIK_REPLICATION_URL}" ]; then
         log "Removing Nominatim replication URL..."
         sed -i \
-            -e "s|^@define('CONST_Replication_Url', '.*');|//@define('CONST_Replication_Url', '');//|g" \
+            -e "s|@define('CONST_Replication_Url', '.*');|//@define('CONST_Replication_Url', '');//|g" \
             '/data/local.php'
     else
         log "Setting Nominatim replication URL..."
         sed -i \
-            -e "s|^@define('CONST_Replication_Url', '.*');|@define('CONST_Replication_Url', '${GEOFABRIK_REPLICATION_URL}');//|g" \
+            -e "s|@define('CONST_Replication_Url', '.*');|@define('CONST_Replication_Url', '${GEOFABRIK_REPLICATION_URL}');//|g" \
             '/data/local.php'
     fi
 
     if [ -z "${NOMINATIM_DB_HOST}" ] || [ "${NOMINATIM_DB_HOST}" = 'localhost' ]; then
         log "Removing Nominatim Database DSN..."
         sed -i \
-            -e "s|^@define('CONST_Database_DSN', '.*');.*|//@define('CONST_Database_DSN', '');|g" \
+            -e "s|@define('CONST_Database_DSN', '.*');.*|//@define('CONST_Database_DSN', '');|g" \
             '/data/local.php'
     else
         log "Setting Nominatim Database DSN..."
         sed -i \
-            -e "s|^//@define('CONST_Database_DSN', '.*');|@define('CONST_Database_DSN', '${NOMINATIM_DB_DRIVER}:host=${NOMINATIM_DB_HOST};port=${NOMINATIM_DB_PORT};user=${NOMINATIM_DB_USER};password=${NOMINATIM_DB_PASSWD};dbname=${NOMINATIM_DB_NAME}');//|g" \
+            -e "s|//@define('CONST_Database_DSN', '.*');|@define('CONST_Database_DSN', '${NOMINATIM_DB_DRIVER}:host=${NOMINATIM_DB_HOST};port=${NOMINATIM_DB_PORT};user=${NOMINATIM_DB_USER};password=${NOMINATIM_DB_PASSWD};dbname=${NOMINATIM_DB_NAME}');//|g" \
             '/data/local.php'
     fi
 
