@@ -102,32 +102,14 @@ init_postgres() {
         exit 1
     fi
 
-    if [ -n "${NOMINATIM_MAP_NAME}" ] && [ ! -f "/data/${NOMINATIM_MAP_NAME}" ]; then
-        if [ -z "${GEOFABRIK_DOWNLOAD_URL}" ]; then
-            log "Missing download URL!"
-            exit 1
-        fi
-
-        log "Starting download of OSM map '${NOMINATIM_MAP_NAME}'..."
-        curl -q -L \
-            -o "/data/${NOMINATIM_MAP_NAME}" \
-            "${GEOFABRIK_DOWNLOAD_URL}"
-        log "Download OSM map '${NOMINATIM_MAP_NAME}' finished."
-    fi
-
-    if [ ! -d "/data/${NOMINATIM_DB_PATH}" ]; then
-        log "Starting import of OSM map into database (this may take hours or days)..."
-        sh /app/init.sh "/data/${NOMINATIM_MAP_NAME}" "${NOMINATIM_DB_PATH}" "${NOMINATIM_INIT_THREADS:-$(nproc)}"
-        log "Import of OSM map into database finished."
-    fi
+    log "Starting import of OSM map into database (this may take hours or days)..."
+    sh /app/init.sh "/data/${NOMINATIM_MAP_NAME}" "${NOMINATIM_DB_PATH}" "${NOMINATIM_INIT_THREADS:-$(nproc)}" "${GEOFABRIK_DOWNLOAD_URL}"
+    log "Import of OSM map into database finished."
 
     if [ -d "/data/${NOMINATIM_DB_PATH}" ]; then
-        # FIXME Dirty hack to get pgsql major version directory
-        PGSQL_MAJOR_VERSION=$(psql --version | grep -oP '[0-9]*\.[0-9]+' | head -n 1 | cut -d. -f 1)
-
-        log "Link OSM database to Postgres ${PGSQL_MAJOR_VERSION} main directory..."
-        ln -s -f "/data/${NOMINATIM_DB_PATH}" "/var/lib/postgresql/${PGSQL_MAJOR_VERSION}/main"
-        log "Link OSM database to Postgres ${PGSQL_MAJOR_VERSION} main directory finished."
+        log "Link OSM database to Postgres ${POSTGRES_VERSION} main directory..."
+        ln -s -f "/data/${NOMINATIM_DB_PATH}" "/var/lib/postgresql/${POSTGRES_VERSION}/main"
+        log "Link OSM database to Postgres ${POSTGRES_VERSION} main directory finished."
     fi
 }
 
@@ -162,6 +144,8 @@ init_config() {
             '/data/local.php'
     fi
 
+    log "Updating custom Nominatim config..."
+    cp /data/local.php /app/src/build/settings/local.php
 }
 
 startstandalone() {

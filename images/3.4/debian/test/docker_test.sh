@@ -22,10 +22,10 @@ if ! ping -c 10 -q nominatim-db ; then
     exit 4
 fi
 
-# XXX Add your own tests
+# Add your own tests
 # https://docs.docker.com/docker-hub/builds/automated-testing/
 #echo "Executing Nominatim app tests..."
-## TODO Test result of tests
+#curl --fail http://127.0.0.1:8080/status.php | grep -q -e 'OK' || exit 1
 
 # Success
 echo 'Docker tests successful'
