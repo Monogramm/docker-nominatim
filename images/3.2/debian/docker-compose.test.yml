@@ -3,7 +3,6 @@ version: "2.3"
 networks:
   nominatim_external_network:
   nominatim_internal_network:
-    internal: true
 
 services:
   # https://docs.docker.com/docker-hub/builds/automated-testing/
