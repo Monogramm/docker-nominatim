@@ -24,8 +24,8 @@ fi
 
 # Add your own tests
 # https://docs.docker.com/docker-hub/builds/automated-testing/
-#echo "Executing Nominatim app tests..."
-#curl --fail http://127.0.0.1:8080/status.php | grep -q -e 'OK' || exit 1
+echo "Checking Nominatim status..."
+curl --fail http://127.0.0.1:8080/status.php | grep -q -e 'OK' || exit 1
 
 # Success
 echo 'Docker tests successful'
