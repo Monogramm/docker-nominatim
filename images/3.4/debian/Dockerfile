@@ -34,6 +34,7 @@ RUN set -ex; \
         libboost-filesystem-dev \
         libexpat1-dev \
         zlib1g-dev \
+        libxml2-dev \
         libbz2-dev \
         libpq-dev \
         libproj-dev \
