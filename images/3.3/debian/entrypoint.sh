@@ -126,7 +126,7 @@ init_postgres() {
         PGSQL_MAJOR_VERSION=$(psql --version | grep -oP '[0-9]*\.[0-9]+' | head -n 1 | cut -d. -f 1)
 
         log "Link OSM database to Postgres ${PGSQL_MAJOR_VERSION} main directory..."
-        ln -s "/data/${NOMINATIM_DB_PATH}" "/var/lib/postgresql/${PGSQL_MAJOR_VERSION}/main"
+        ln -s -f "/data/${NOMINATIM_DB_PATH}" "/var/lib/postgresql/${PGSQL_MAJOR_VERSION}/main"
         log "Link OSM database to Postgres ${PGSQL_MAJOR_VERSION} main directory finished."
     fi
 }
