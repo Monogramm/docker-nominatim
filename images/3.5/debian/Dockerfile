@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     POSTGRES_VERSION=12 \
     POSTGIS_VERSION=3 \
-    NOMINATIM_VERSION=3.5 \
+    NOMINATIM_VERSION=v3.5.2 \
     NOMINATIM_INIT_THREADS= \
     GEOFABRIK_DOWNLOAD_URL= \
     GEOFABRIK_REPLICATION_URL= \
@@ -41,7 +41,9 @@ RUN set -ex; \
         "postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}" \
         postgresql-contrib \
         "postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts" \
-        apache2 php php-pgsql \
+        apache2 \
+        php \
+        php-pgsql \
         libapache2-mod-php \
         php-intl \
         python3-setuptools \

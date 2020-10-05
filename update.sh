@@ -15,9 +15,9 @@ declare -A ubuntu=(
 	[2.5]='trusty'
 	[3.0]='xenial'
 	[3.1]='xenial'
-	[3.2]='cosmic'
-	[3.3]='disco'
-	[3.4]='eoan'
+	[3.2]='bionic'
+	[3.3]='bionic'
+	[3.4]='focal'
 	[3.5]='focal'
 )
 
@@ -112,7 +112,7 @@ for latest in "${latests[@]}"; do
 			# Replace the variables.
 			sed -ri -e '
 				s/%%VARIANT%%/-'"$variant"'/g;
-				s/%%VERSION%%/'"$version"'/g;
+				s/%%VERSION%%/v'"$latest"'/g;
 				s/%%UBUNTU_VERSION%%/'"${ubuntu[$version]}"'/g;
 				s/%%POSTGRES_VERSION%%/'"${postgres[$version]}"'/g;
 				s/%%POSTGIS_VERSION%%/'"${postgis[$version]}"'/g;
