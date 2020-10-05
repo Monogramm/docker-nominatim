@@ -19,7 +19,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 # Add requirements
 RUN set -ex; \
-    apt-get update -q; \
+    apt-get update -y -qq; \
     apt-get install -y --allow-unauthenticated \
         locales \
     ; \
