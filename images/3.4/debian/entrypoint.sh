@@ -108,6 +108,7 @@ init_postgres() {
 
     if [ -d "/data/${NOMINATIM_DB_PATH}" ]; then
         log "Link OSM database to Postgres ${POSTGRES_VERSION} main directory..."
+        rm -rf "/var/lib/postgresql/${POSTGRES_VERSION}/main"
         ln -s -f "/data/${NOMINATIM_DB_PATH}" "/var/lib/postgresql/${POSTGRES_VERSION}/main"
         log "Link OSM database to Postgres ${POSTGRES_VERSION} main directory finished."
     fi
