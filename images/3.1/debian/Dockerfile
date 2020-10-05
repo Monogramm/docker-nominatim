@@ -1,6 +1,11 @@
-FROM mediagis/nominatim:3.1
+FROM ubuntu:xenial
 
-ENV NOMINATIM_INIT_THREADS= \
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    POSTGRES_VERSION=9.5 \
+    POSTGIS_VERSION=2.2 \
+    NOMINATIM_VERSION=v3.1.0 \
+    NOMINATIM_INIT_THREADS= \
     GEOFABRIK_DOWNLOAD_URL= \
     GEOFABRIK_REPLICATION_URL= \
     NOMINATIM_MAP_NAME= \
@@ -8,45 +13,136 @@ ENV NOMINATIM_INIT_THREADS= \
     NOMINATIM_DB_DRIVER=pgsql \
     NOMINATIM_DB_HOST=localhost \
     NOMINATIM_DB_PORT=5432 \
-    NOMINATIM_DB_NAME= \
-    NOMINATIM_DB_USER= \
-    NOMINATIM_DB_PASSWD=
+    NOMINATIM_DB_NAME=nominatim \
+    NOMINATIM_DB_USER=nominatim \
+    NOMINATIM_DB_PASSWD=password1234
 
-# Add requirements and install application
+# Add requirements
 RUN set -ex; \
-    apt-get update -q; \
+    apt-get update -y -qq; \
     apt-get install -y --allow-unauthenticated \
+        locales \
+    ; \
+    locale-gen en_US.UTF-8; \
+    update-locale LANG=en_US.UTF-8; \
+    apt-get install -o APT::Install-Recommends="false" -o APT::Install-Suggests="false" -y --allow-unauthenticated \
+        build-essential \
+        cmake \
+        g++ \
+        libboost-dev \
+        libboost-system-dev \
+        libboost-filesystem-dev \
+        libexpat1-dev \
+        zlib1g-dev \
+        libxml2-dev \
+        libbz2-dev \
+        libpq-dev \
+        libproj-dev \
+        "postgresql-server-dev-${POSTGRES_VERSION}" \
+        "postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}" \
+        postgresql-contrib \
+         \
+        apache2 \
+        php \
+        php-pgsql \
+        libapache2-mod-php \
+        php-intl \
+        python3-setuptools \
+        python3-dev \
+        python3-pip \
+        python3-psycopg2 \
+        python3-tidylib \
+        git \
         curl \
+        sudo \
         netcat \
-        wget \
+    ; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/*; \
+    rm -rf \
+        /tmp/* \
+        /var/tmp/* \
     ;
 
-COPY ./entrypoint.sh /
+WORKDIR /app
+
+# Configure postgres
+# Osmium install to run continuous updates
+# Nominatim install
+RUN set -ex; \
+    echo "host all  all    0.0.0.0/0  trust" >> "/etc/postgresql/${POSTGRES_VERSION}/main/pg_hba.conf"; \
+    echo "listen_addresses='*'" >> "/etc/postgresql/${POSTGRES_VERSION}/main/postgresql.conf"; \
+    pip3 install osmium; \
+    git clone --recursive https://github.com/openstreetmap/Nominatim ./src; \
+    cd ./src; \
+    git checkout "tags/$NOMINATIM_VERSION"; \
+    git submodule update --recursive --init; \
+    mkdir build; \
+    cd build; \
+    cmake ..; \
+    make -j`nproc`
+
+# Apache configure
+COPY local.php /app/src/build/settings/local.php
+COPY nominatim-apache.conf /etc/apache2/sites-enabled/000-default.conf
+
+# Load initial data
+ARG with_postcodes_gb
+ARG with_postcodes_us
+RUN set -ex; \
+    if [ "$with_postcodes_gb" = "" ]; then \
+        echo "Skipping optional GB postcode file"; \
+    else \
+        echo "Downloading optional GB postcode file"; \
+        curl http://www.nominatim.org/data/gb_postcode_data.sql.gz > /app/src/data/gb_postcode_data.sql.gz; \
+    fi; \
+    if [ "$with_postcodes_us" = "" ]; then \
+        echo "Skipping optional US postcode file"; \
+    else \
+        echo "Downloading optional US postcode file"; \
+        curl http://www.nominatim.org/data/us_postcode_data.sql.gz > /app/src/data/us_postcode_data.sql.gz; \
+    fi; \
+    curl http://www.nominatim.org/data/country_grid.sql.gz > /app/src/data/country_osm_grid.sql.gz; \
+    sed -i \
+        -e "s|@define('CONST_Postgresql_Version', '.*');|@define('CONST_Postgresql_Version', '${POSTGRES_VERSION}');|g" \
+        -e "s|@define('CONST_Postgis_Version', '.*');|@define('CONST_Postgis_Version', '${POSTGIS_VERSION}');//|g" \
+        /app/src/build/settings/local.php; \
+    chmod o=rwx /app/src/build
+
+EXPOSE 5432
+EXPOSE 8080
+
+COPY entrypoint.sh start.sh startapache.sh startpostgres.sh init.sh /app/
 
 # Update entrypoint permissions
 RUN set -ex; \
-    chmod +x /entrypoint.sh
+    chmod +x \
+        /app/entrypoint.sh \
+        /app/start.sh \
+        /app/startapache.sh \
+        /app/startpostgres.sh \
+        /app/init.sh \
+    ;
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["start"]
 
-VOLUME /data
+VOLUME [ "/data" ]
 
 # Arguments to label built container
 ARG VCS_REF
 ARG BUILD_DATE
-ARG VERSION=3.1
 
 # Keep track of image version
 RUN set -ex; \
-    echo "${VERSION} ${VCS_REF} ${BUILD_DATE}" > '/app/src/.docker-version'; \
+    echo "${NOMINATIM_VERSION} ${VCS_REF} ${BUILD_DATE}" > '/app/src/.docker-version'; \
     echo "${NOMINATIM_VERSION}" > '/app/src/.app-version'
 
 # Container labels (http://label-schema.org/)
 # Container annotations (https://github.com/opencontainers/image-spec)
 LABEL maintainer="Monogramm maintainers <opensource at monogramm dot io>" \
       product="Nominatim" \
-      version=$VERSION \
+      version=$NOMINATIM_VERSION \
       org.label-schema.vcs-ref=$VCS_REF \
       org.label-schema.vcs-url="https://github.com/Monogramm/docker-nominatim" \
       org.label-schema.build-date=$BUILD_DATE \
@@ -54,7 +150,7 @@ LABEL maintainer="Monogramm maintainers <opensource at monogramm dot io>" \
       org.label-schema.description="Open Source search based on OpenStreetMap data" \
       org.label-schema.url="https://nominatim.org/" \
       org.label-schema.vendor="osm-search" \
-      org.label-schema.version=$VERSION \
+      org.label-schema.version=$NOMINATIM_VERSION \
       org.label-schema.schema-version="1.0" \
       org.opencontainers.image.revision=$VCS_REF \
       org.opencontainers.image.source="https://github.com/Monogramm/docker-nominatim" \
@@ -63,5 +159,5 @@ LABEL maintainer="Monogramm maintainers <opensource at monogramm dot io>" \
       org.opencontainers.image.description="Open Source search based on OpenStreetMap data" \
       org.opencontainers.image.url="https://nominatim.org/" \
       org.opencontainers.image.vendor="osm-search" \
-      org.opencontainers.image.version=$VERSION \
+      org.opencontainers.image.version=$NOMINATIM_VERSION \
       org.opencontainers.image.authors="Monogramm maintainers <opensource at monogramm dot io>"

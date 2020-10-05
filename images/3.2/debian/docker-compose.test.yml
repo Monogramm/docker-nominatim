@@ -3,7 +3,6 @@ version: "2.3"
 networks:
   nominatim_external_network:
   nominatim_internal_network:
-    internal: true
 
 services:
   # https://docs.docker.com/docker-hub/builds/automated-testing/
@@ -35,6 +34,8 @@ services:
         - BUILD_DATE=${BUILD_DATE}
     image: ${IMAGE_NAME}
     container_name: nominatim
+    hostname: nominatim
+    domainname: example.com
     #restart: always
     command: startapache
     depends_on:
