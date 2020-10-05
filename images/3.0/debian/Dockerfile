@@ -41,7 +41,7 @@ RUN set -ex; \
         "postgresql-server-dev-${POSTGRES_VERSION}" \
         "postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}" \
         postgresql-contrib \
-        "postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts" \
+         \
         apache2 \
         php \
         php-pgsql \

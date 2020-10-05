@@ -21,6 +21,16 @@ declare -A ubuntu=(
 	[3.5]='focal'
 )
 
+declare -A extra=(
+	[2.5]=''
+	[3.0]=''
+	[3.1]=''
+	[3.2]=''
+	[3.3]=''
+	[3.4]='"postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts"'
+	[3.5]='"postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts"'
+)
+
 declare -A postgres=(
 	[2.5]='9.3'
 	[3.0]='9.5'
@@ -116,6 +126,7 @@ for latest in "${latests[@]}"; do
 				s/%%UBUNTU_VERSION%%/'"${ubuntu[$version]}"'/g;
 				s/%%POSTGRES_VERSION%%/'"${postgres[$version]}"'/g;
 				s/%%POSTGIS_VERSION%%/'"${postgis[$version]}"'/g;
+				s/%%EXTRA%%/'"${extra[$version]}"'/g;
 			' "$dir/Dockerfile"
 
 			# Add Travis-CI env var
