@@ -6,16 +6,21 @@ log() {
     echo "[$0] [$(date +%Y-%m-%dT%H:%M:%S%:z)] $@"
 }
 
-OSMFILE=$1
+OSMFILE=${1:-/data/${NOMINATIM_MAP_NAME}}
 PGDIR=${2:-${NOMINATIM_DB_NAME}-postgres}
 THREADS=${3:-$(nproc)}
-OSMDOWNLOAD=$4
+OSMDOWNLOAD=${4:-${GEOFABRIK_DOWNLOAD_URL}}
 
 export PGDATA=/data/${PGDIR}
 
-if [ ! -f "${OSMFILE}" ]; then
+if [ ! -f "${OSMFILE}" ] || [ ! -d "${PGDATA}" ]; then
     rm -rf "${PGDATA}"
     mkdir -p "${PGDATA}"
+
+    if [ -z "${OSMFILE}" ]; then
+        log "Missing download URL for OSM file!"
+        exit 1
+    fi
 
     if [ -z "${OSMDOWNLOAD}" ]; then
         log "Missing download URL for OSM file!"
