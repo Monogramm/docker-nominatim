@@ -32,8 +32,12 @@ fi
 
 chown postgres:postgres "${PGDATA}"
 
-log "Starting database for initialization..."
-sudo -u postgres "/usr/lib/postgresql/${POSTGRES_VERSION}/bin/initdb" -D "${PGDATA}"
+if [ -f "${OSMFILE}.todo" ]; then
+    log "Initializating database..."
+    sudo -u postgres "/usr/lib/postgresql/${POSTGRES_VERSION}/bin/initdb" -D "${PGDATA}"
+fi
+
+log "Starting database..."
 sudo -u postgres "/usr/lib/postgresql/${POSTGRES_VERSION}/bin/pg_ctl" -D "${PGDATA}" start
 
 if ! id -u "${NOMINATIM_DB_USER}"; then
@@ -62,6 +66,6 @@ if [ -f ./src/build/utils/check_import_finished.php ]; then
     log "Check of import finished."
 fi
 
-log "Stoping database after initialization..."
+log "Stoping database..."
 sudo -u postgres "/usr/lib/postgresql/${POSTGRES_VERSION}/bin/pg_ctl" -D "${PGDATA}" stop
 sudo chown -R postgres:postgres "${PGDATA}"

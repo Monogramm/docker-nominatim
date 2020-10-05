@@ -102,9 +102,9 @@ init_postgres() {
         exit 1
     fi
 
-    log "Starting import of OSM map into database (this may take hours or days)..."
+    log "Starting initialization of OSM database (this may take hours or days)..."
     sh /app/init.sh "/data/${NOMINATIM_MAP_NAME}" "${NOMINATIM_DB_PATH}" "${NOMINATIM_INIT_THREADS:-$(nproc)}" "${GEOFABRIK_DOWNLOAD_URL}"
-    log "Import of OSM map into database finished."
+    log "Initialization of initialization of OSM database finished."
 
     if [ -d "/data/${NOMINATIM_DB_PATH}" ]; then
         log "Link OSM database to Postgres ${POSTGRES_VERSION} main directory..."
