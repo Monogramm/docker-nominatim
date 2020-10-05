@@ -45,16 +45,19 @@ fi
 log "Starting database..."
 sudo -u postgres "/usr/lib/postgresql/${POSTGRES_VERSION}/bin/pg_ctl" -D "${PGDATA}" start
 
-if ! id -u "${NOMINATIM_DB_USER}"; then
-    log "Creating users in database..."
+log "Checking Postgres user '${NOMINATIM_DB_USER}'..."
+sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='${NOMINATIM_DB_USER}'" | grep -q 1 || sudo -u postgres createuser -s "${NOMINATIM_DB_USER}"
+log "Checking Postgres user 'www-data'..."
+sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='www-data'" | grep -q 1 || sudo -u postgres createuser -SDR www-data
 
-    sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='${NOMINATIM_DB_USER}'" | grep -q 1 || sudo -u postgres createuser -s "${NOMINATIM_DB_USER}"
-    sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='www-data'" | grep -q 1 || sudo -u postgres createuser -SDR www-data
+if ! id -u "${NOMINATIM_DB_USER}"; then
+    log "Dropping database '${NOMINATIM_DB_NAME}' and creating system user '${NOMINATIM_DB_USER}'..."
+
     sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS ${NOMINATIM_DB_NAME}"
     useradd -m -p "${NOMINATIM_DB_PASSWD}" "${NOMINATIM_DB_USER}"
     chown -R "${NOMINATIM_DB_USER}:${NOMINATIM_DB_USER}" ./src
 
-    log "Creation of users in database finished."
+    log "Drop of database '${NOMINATIM_DB_NAME}' and creation of system user '${NOMINATIM_DB_USER}' finished."
 fi
 
 if [ -f "${OSMFILE}.todo" ]; then
