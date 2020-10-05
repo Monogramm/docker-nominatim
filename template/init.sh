@@ -20,6 +20,10 @@ sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS ${NOMINATIM_DB_NAME}"
 useradd -m -p "${NOMINATIM_DB_PASSWD}" "${NOMINATIM_DB_USER}"
 chown -R "${NOMINATIM_DB_USER}:${NOMINATIM_DB_USER}" ./src
 sudo -u "${NOMINATIM_DB_USER}" ./src/build/utils/setup.php --osm-file "${OSMFILE}" --all --threads "${THREADS}"
-sudo -u "${NOMINATIM_DB_USER}" ./src/build/utils/check_import_finished.php
+
+if [ -f ./src/build/utils/check_import_finished.php ]; then
+    sudo -u "${NOMINATIM_DB_USER}" ./src/build/utils/check_import_finished.php
+fi
+
 sudo -u postgres "/usr/lib/postgresql/${POSTGRES_VERSION}/bin/pg_ctl" -D "${PGDATA}" stop
 sudo chown -R postgres:postgres "${PGDATA}"
