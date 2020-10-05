@@ -170,7 +170,7 @@ startstandalone() {
     init_version
 
     log "Starting Nominatim as a single node..."
-    bash /app/start.sh
+    sh /app/start.sh
 }
 
 startpostgres() {

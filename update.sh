@@ -11,6 +11,36 @@ declare -A base=(
 	[alpine]='alpine'
 )
 
+declare -A ubuntu=(
+	[2.5]='trusty'
+	[3.0]='xenial'
+	[3.1]='xenial'
+	[3.2]='cosmic'
+	[3.3]='disco'
+	[3.4]='eoan'
+	[3.5]='focal'
+)
+
+declare -A postgres=(
+	[2.5]='9.3'
+	[3.0]='9.5'
+	[3.1]='9.5'
+	[3.2]='10'
+	[3.3]='11'
+	[3.4]='11'
+	[3.5]='12'
+)
+
+declare -A postgis=(
+	[2.5]='2.1'
+	[3.0]='2.2'
+	[3.1]='2.2'
+	[3.2]='2.4'
+	[3.3]='2.5'
+	[3.4]='2.5'
+	[3.5]='3'
+)
+
 variants=(
 	debian
 	#alpine
@@ -29,7 +59,15 @@ dockerRepo="monogramm/docker-nominatim"
 latests=( $( curl -fsSL 'https://api.github.com/repos/osm-search/Nominatim/tags' |tac|tac| \
 	grep -oE '[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+' | \
 	sort -urV ) )
-#latests=( 1.0.0 )
+#latests=(
+#	2.5
+#	3.0
+#	3.1
+#	3.2
+#	3.3
+#	3.4
+#	3.5
+#)
 
 # Remove existing images
 echo "reset docker images"
@@ -55,7 +93,15 @@ for latest in "${latests[@]}"; do
 
 			template="Dockerfile.${base[$variant]}"
 			cp "template/$template" "$dir/Dockerfile"
-			cp "template/entrypoint.sh" "$dir/entrypoint.sh"
+			cp \
+				"template/entrypoint.sh" \
+				"template/init.sh" \
+				"template/start.sh" \
+				"template/startapache.sh" \
+				"template/startpostgres.sh" \
+				"template/local.php" \
+				"template/nominatim-apache.conf" \
+				"$dir/"
 
 			cp "template/.dockerignore" "$dir/.dockerignore"
 			cp -r "template/hooks" "$dir/"
@@ -67,12 +113,15 @@ for latest in "${latests[@]}"; do
 			sed -ri -e '
 				s/%%VARIANT%%/-'"$variant"'/g;
 				s/%%VERSION%%/'"$version"'/g;
+				s/%%UBUNTU_VERSION%%/'"${ubuntu[$version]}"'/g;
+				s/%%POSTGRES_VERSION%%/'"${postgres[$version]}"'/g;
+				s/%%POSTGIS_VERSION%%/'"${postgis[$version]}"'/g;
 			' "$dir/Dockerfile"
 
 			# Add Travis-CI env var
 			travisEnv='\n    - VERSION='"$version"' VARIANT='"$variant$travisEnv"
 
-			if [[ $1 == 'build' ]]; then
+			if [[ "$1" == 'build' ]]; then
 				tag="$version-$variant"
 				echo "Build Dockerfile for ${tag}"
 				docker build -t "${dockerRepo}:${tag}" "$dir"
