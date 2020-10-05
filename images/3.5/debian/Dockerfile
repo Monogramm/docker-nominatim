@@ -82,8 +82,6 @@ RUN set -ex; \
     cmake ..; \
     make -j`nproc`
 
-COPY ./entrypoint.sh /
-
 # Apache configure
 COPY local.php /app/src/build/settings/local.php
 COPY nominatim-apache.conf /etc/apache2/sites-enabled/000-default.conf
@@ -114,22 +112,19 @@ RUN set -ex; \
 EXPOSE 5432
 EXPOSE 8080
 
-COPY start.sh /app/start.sh
-COPY startapache.sh /app/startapache.sh
-COPY startpostgres.sh /app/startpostgres.sh
-COPY init.sh /app/init.sh
+COPY entrypoint.sh start.sh startapache.sh startpostgres.sh init.sh /app/
 
 # Update entrypoint permissions
 RUN set -ex; \
     chmod +x \
-        /entrypoint.sh \
+        /app/entrypoint.sh \
         /app/start.sh \
         /app/startapache.sh \
         /app/startpostgres.sh \
         /app/init.sh \
     ;
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["start"]
 
 VOLUME [ "/data" ]
