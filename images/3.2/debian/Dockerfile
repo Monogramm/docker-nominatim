@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM ubuntu:cosmic
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \

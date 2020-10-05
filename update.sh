@@ -15,9 +15,9 @@ declare -A ubuntu=(
 	[2.5]='trusty'
 	[3.0]='xenial'
 	[3.1]='xenial'
-	[3.2]='bionic'
-	[3.3]='bionic'
-	[3.4]='focal'
+	[3.2]='cosmic'
+	[3.3]='disco'
+	[3.4]='eoan'
 	[3.5]='focal'
 )
 
