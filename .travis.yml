@@ -55,6 +55,14 @@ script:
 notifications:
   email: false
 
+jobs:
+  allow_failures:
+    - env: VERSION=2.5 VARIANT=debian
+    - env: VERSION=3.0 VARIANT=debian
+    - env: VERSION=3.1 VARIANT=debian
+    - env: VERSION=3.2 VARIANT=debian
+    - env: VERSION=3.3 VARIANT=debian
+
 env: # Environments
     - VERSION=2.5 VARIANT=debian
     - VERSION=3.0 VARIANT=debian
