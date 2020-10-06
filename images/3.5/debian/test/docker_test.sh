@@ -3,7 +3,7 @@
 set -e
 
 echo "Waiting to ensure everything is fully ready for the tests..."
-sleep 60
+sleep 90
 
 echo "Checking main containers are reachable..."
 if ! ping -c 10 -q nominatim ; then
@@ -22,10 +22,10 @@ if ! ping -c 10 -q nominatim-db ; then
     exit 4
 fi
 
-# XXX Add your own tests
+# Add your own tests
 # https://docs.docker.com/docker-hub/builds/automated-testing/
-#echo "Executing Nominatim app tests..."
-## TODO Test result of tests
+echo "Checking Nominatim status..."
+curl --fail http://nominatim:8080/status.php | grep -q -e 'OK' || exit 1
 
 # Success
 echo 'Docker tests successful'
