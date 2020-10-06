@@ -50,14 +50,21 @@ sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='${NOM
 log "Checking Postgres user 'www-data'..."
 sudo -u postgres psql postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname='www-data'" | grep -q 1 || sudo -u postgres createuser -SDR www-data
 
-if ! id -u "${NOMINATIM_DB_USER}"; then
-    log "Dropping database '${NOMINATIM_DB_NAME}' and creating system user '${NOMINATIM_DB_USER}'..."
+if [ -f "${OSMFILE}.todo" ]; then
+    log "Dropping database '${NOMINATIM_DB_NAME}'..."
 
     sudo -u postgres psql postgres -c "DROP DATABASE IF EXISTS ${NOMINATIM_DB_NAME}"
+
+    log "Drop of database '${NOMINATIM_DB_NAME}' finished."
+fi
+
+if ! id -u "${NOMINATIM_DB_USER}"; then
+    log "Creating system user '${NOMINATIM_DB_USER}'..."
+
     useradd -m -p "${NOMINATIM_DB_PASSWD}" "${NOMINATIM_DB_USER}"
     chown -R "${NOMINATIM_DB_USER}:${NOMINATIM_DB_USER}" ./src
 
-    log "Drop of database '${NOMINATIM_DB_NAME}' and creation of system user '${NOMINATIM_DB_USER}' finished."
+    log "Creation of system user '${NOMINATIM_DB_USER}' finished."
 fi
 
 if [ -f "${OSMFILE}.todo" ]; then
