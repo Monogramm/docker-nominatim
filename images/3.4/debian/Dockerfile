@@ -89,7 +89,7 @@ RUN set -ex; \
     mkdir build; \
     cd build; \
     cmake ..; \
-    make -j`nproc` \
+    make -j`nproc`; \
     chmod o=rwx .; \
     apt-get -y remove --purge \
         cpp-9 \
