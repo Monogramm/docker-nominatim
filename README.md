@@ -11,6 +11,9 @@
 
 Docker image for **Nominatim**.
 
+It was created in order to provide a solution for mediagis/nominatim-docker#147.
+It also provides CI integration and other improvements.
+
 :construction: **This image is still in beta!**
 
 ## What is **Nominatim**
