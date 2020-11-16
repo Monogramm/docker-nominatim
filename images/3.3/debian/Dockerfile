@@ -1,4 +1,4 @@
-FROM ubuntu:disco
+FROM ubuntu:disco AS build
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
@@ -17,8 +17,16 @@ ENV DEBIAN_FRONTEND=noninteractive \
     NOMINATIM_DB_USER=nominatim \
     NOMINATIM_DB_PASSWD=password1234
 
+# Do not start daemons after installation.
 # Add requirements
+# Configure postgres
+# Osmium install to run continuous updates
+# Nominatim install
+# Remove development and unused packages
+# Clear temporary files and directories
 RUN set -ex; \
+    echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d; \
+    chmod +x /usr/sbin/policy-rc.d; \
     apt-get update -y -qq; \
     apt-get install -y --allow-unauthenticated \
         locales \
@@ -62,25 +70,49 @@ RUN set -ex; \
     rm -rf \
         /tmp/* \
         /var/tmp/* \
-    ;
-
-WORKDIR /app
-
-# Configure postgres
-# Osmium install to run continuous updates
-# Nominatim install
-RUN set -ex; \
+    ; \
     echo "host all  all    0.0.0.0/0  trust" >> "/etc/postgresql/${POSTGRES_VERSION}/main/pg_hba.conf"; \
     echo "listen_addresses='*'" >> "/etc/postgresql/${POSTGRES_VERSION}/main/postgresql.conf"; \
     pip3 install osmium; \
-    git clone --recursive https://github.com/openstreetmap/Nominatim ./src; \
-    cd ./src; \
+    git clone \
+        --config advice.detachedHead=false \
+        --single-branch \
+        --branch $NOMINATIM_VERSION \
+        --depth 1 \
+        --recursive \
+        https://github.com/openstreetmap/Nominatim \
+        /app/src\
+    ; \
+    cd /app/src; \
     git checkout "tags/$NOMINATIM_VERSION"; \
     git submodule update --recursive --init; \
     mkdir build; \
     cd build; \
     cmake ..; \
-    make -j`nproc`
+    make -j`nproc` \
+    chmod o=rwx .; \
+    apt-get -y remove --purge \
+        cpp-9 \
+        gcc-9* \
+        g++ \
+        git \
+        make \
+        cmake* \
+        llvm-10* \
+        libc6-dev \
+        linux-libc-dev \
+        libclang-*-dev \
+        build-essential \
+        "postgresql-server-dev-${POSTGRES_VERSION}" \
+    ; \
+    apt-get clean; \
+    rm -rf \
+        /tmp/* \
+        /var/tmp/* \
+        /root/.cache \
+        /app/src/.git \
+        /var/lib/apt/lists/* \
+        "/var/lib/postgresql/${POSTGRES_VERSION}/main"/*
 
 # Apache configure
 COPY local.php /app/src/build/settings/local.php
@@ -106,11 +138,7 @@ RUN set -ex; \
     sed -i \
         -e "s|@define('CONST_Postgresql_Version', '.*');|@define('CONST_Postgresql_Version', '${POSTGRES_VERSION}');|g" \
         -e "s|@define('CONST_Postgis_Version', '.*');|@define('CONST_Postgis_Version', '${POSTGIS_VERSION}');//|g" \
-        /app/src/build/settings/local.php; \
-    chmod o=rwx /app/src/build
-
-EXPOSE 5432
-EXPOSE 8080
+        /app/src/build/settings/local.php
 
 COPY entrypoint.sh start.sh startapache.sh startpostgres.sh init.sh /app/
 
@@ -124,10 +152,18 @@ RUN set -ex; \
         /app/init.sh \
     ;
 
+# Collapse image to single layer.
+FROM ubuntu:disco
+
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["start"]
 
 VOLUME [ "/data" ]
+
+WORKDIR /app
+
+EXPOSE 5432
+EXPOSE 8080
 
 # Arguments to label built container
 ARG VCS_REF
@@ -161,3 +197,5 @@ LABEL maintainer="Monogramm maintainers <opensource at monogramm dot io>" \
       org.opencontainers.image.vendor="osm-search" \
       org.opencontainers.image.version=$NOMINATIM_VERSION \
       org.opencontainers.image.authors="Monogramm maintainers <opensource at monogramm dot io>"
+
+COPY --from=build / /
