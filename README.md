@@ -11,7 +11,7 @@
 
 Docker image for **Nominatim**.
 
-:construction: **This image is still in development!**
+:construction: **This image is still in beta!**
 
 ## What is **Nominatim**
 
@@ -25,11 +25,6 @@ Open Source search based on OpenStreetMap data
 
 -   `3.5` `latest`
 -   `3.4`
--   `3.3`
--   `3.2`
--   `3.1`
--   `3.0`
--   `2.5`
 
 ## How to run this image
 
