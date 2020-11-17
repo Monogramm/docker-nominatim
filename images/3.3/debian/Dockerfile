@@ -153,7 +153,7 @@ RUN set -ex; \
     ;
 
 # Collapse image to single layer.
-FROM ubuntu:disco
+FROM scratch
 
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["start"]
