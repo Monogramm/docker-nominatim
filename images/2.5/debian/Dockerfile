@@ -97,8 +97,7 @@ RUN set -ex; \
         g++ \
         git \
         make \
-        cmake* \
-        llvm-10* \
+        cmake \
         libc6-dev \
         linux-libc-dev \
         libclang-*-dev \
