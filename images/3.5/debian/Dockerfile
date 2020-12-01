@@ -91,7 +91,7 @@ RUN set -ex; \
     cmake ..; \
     make -j`nproc`; \
     chmod o=rwx .; \
-    apt-get -y remove --purge \
+    apt-get -y remove --purge --allow-remove-essential \
         cpp-9 \
         gcc-9* \
         g++ \
