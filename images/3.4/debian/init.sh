@@ -33,8 +33,14 @@ if [ ! -f "${OSMFILE}" ] || [ ! -d "${PGDATA}" ]; then
 
     touch "${OSMFILE}.todo"
 
+else
+
+    log "Initialization of database already performed for OSM map '${OSMFILE}'."
+    exit 0
+
 fi
 
+log "Starting initialization of OSM database with map '${OSMFILE}' (this may take hours or days)..."
 chown postgres:postgres "${PGDATA}"
 
 if [ -f "${OSMFILE}.todo" ]; then
@@ -60,8 +66,9 @@ fi
 
 if ! id -u "${NOMINATIM_DB_USER}"; then
     log "Creating system user '${NOMINATIM_DB_USER}'..."
-
     useradd -m -p "${NOMINATIM_DB_PASSWD}" "${NOMINATIM_DB_USER}"
+
+    log "Setting permissions to user '${NOMINATIM_DB_USER}'..."
     chown -R "${NOMINATIM_DB_USER}:${NOMINATIM_DB_USER}" ./src
 
     log "Creation of system user '${NOMINATIM_DB_USER}' finished."

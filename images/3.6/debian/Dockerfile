@@ -1,10 +1,10 @@
-FROM ubuntu:%%UBUNTU_VERSION%% AS build
+FROM ubuntu: AS build
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
-    POSTGRES_VERSION=%%POSTGRES_VERSION%% \
-    POSTGIS_VERSION=%%POSTGIS_VERSION%% \
-    NOMINATIM_VERSION=%%VERSION%% \
+    POSTGRES_VERSION= \
+    POSTGIS_VERSION= \
+    NOMINATIM_VERSION=v3.6.0 \
     NOMINATIM_INIT_THREADS= \
     GEOFABRIK_DOWNLOAD_URL= \
     GEOFABRIK_REPLICATION_URL= \
@@ -49,7 +49,7 @@ RUN set -ex; \
         "postgresql-server-dev-${POSTGRES_VERSION}" \
         "postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}" \
         postgresql-contrib \
-        %%EXTRA%% \
+         \
         apache2 \
         php \
         php-pgsql \

@@ -152,6 +152,11 @@ RUN set -ex; \
         /app/init.sh \
     ;
 
+# Keep track of image version
+RUN set -ex; \
+    echo "${NOMINATIM_VERSION} ${VCS_REF} ${BUILD_DATE}" > '/app/src/.docker-version'; \
+    echo "${NOMINATIM_VERSION}" > '/app/src/.app-version'
+
 # Collapse image to single layer.
 FROM scratch
 
@@ -168,11 +173,6 @@ EXPOSE 8080
 # Arguments to label built container
 ARG VCS_REF
 ARG BUILD_DATE
-
-# Keep track of image version
-RUN set -ex; \
-    echo "${NOMINATIM_VERSION} ${VCS_REF} ${BUILD_DATE}" > '/app/src/.docker-version'; \
-    echo "${NOMINATIM_VERSION}" > '/app/src/.app-version'
 
 # Container labels (http://label-schema.org/)
 # Container annotations (https://github.com/opencontainers/image-spec)
