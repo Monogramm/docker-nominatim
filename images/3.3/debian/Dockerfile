@@ -1,4 +1,4 @@
-FROM ubuntu:disco AS build
+FROM ubuntu:bionic AS build
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
@@ -97,7 +97,7 @@ RUN set -ex; \
         g++ \
         git \
         make \
-        cmake* \
+        cmake \
         llvm-10* \
         libc6-dev \
         linux-libc-dev \

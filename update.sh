@@ -15,10 +15,11 @@ declare -A ubuntu=(
 	[2.5]='trusty'
 	[3.0]='xenial'
 	[3.1]='xenial'
-	[3.2]='cosmic'
-	[3.3]='disco'
-	[3.4]='eoan'
+	[3.2]='bionic'
+	[3.3]='bionic'
+	[3.4]='focal'
 	[3.5]='focal'
+	[3.6]='focal'
 )
 
 declare -A extra=(
@@ -29,16 +30,18 @@ declare -A extra=(
 	[3.3]=''
 	[3.4]='"postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts"'
 	[3.5]='"postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts"'
+	[3.6]='"postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts"'
 )
 
 declare -A postgres=(
 	[2.5]='9.3'
 	[3.0]='9.5'
 	[3.1]='9.5'
-	[3.2]='10'
+	[3.2]='11'
 	[3.3]='11'
-	[3.4]='11'
+	[3.4]='12'
 	[3.5]='12'
+	[3.6]='12'
 )
 
 declare -A postgis=(
@@ -47,8 +50,9 @@ declare -A postgis=(
 	[3.1]='2.2'
 	[3.2]='2.4'
 	[3.3]='2.5'
-	[3.4]='2.5'
+	[3.4]='3'
 	[3.5]='3'
+	[3.6]='3'
 )
 
 variants=(

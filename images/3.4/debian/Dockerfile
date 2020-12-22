@@ -1,9 +1,9 @@
-FROM ubuntu:eoan AS build
+FROM ubuntu:focal AS build
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
-    POSTGRES_VERSION=11 \
-    POSTGIS_VERSION=2.5 \
+    POSTGRES_VERSION=12 \
+    POSTGIS_VERSION=3 \
     NOMINATIM_VERSION=v3.4.2 \
     NOMINATIM_INIT_THREADS= \
     GEOFABRIK_DOWNLOAD_URL= \
@@ -97,7 +97,7 @@ RUN set -ex; \
         g++ \
         git \
         make \
-        cmake* \
+        cmake \
         llvm-10* \
         libc6-dev \
         linux-libc-dev \

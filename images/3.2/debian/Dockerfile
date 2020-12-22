@@ -1,8 +1,8 @@
-FROM ubuntu:cosmic AS build
+FROM ubuntu:bionic AS build
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
-    POSTGRES_VERSION=10 \
+    POSTGRES_VERSION=11 \
     POSTGIS_VERSION=2.4 \
     NOMINATIM_VERSION=v3.2.1 \
     NOMINATIM_INIT_THREADS= \
@@ -97,7 +97,7 @@ RUN set -ex; \
         g++ \
         git \
         make \
-        cmake* \
+        cmake \
         llvm-10* \
         libc6-dev \
         linux-libc-dev \
