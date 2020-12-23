@@ -68,7 +68,7 @@ function version_greater_or_equal() {
 	[[ "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1" || "$1" == "$2" ]];
 }
 
-dockerRepo="monogramm/docker-nominatim"
+DOCKER_REPO="monogramm/docker-nominatim"
 # Retrieve automatically the latest versions
 latests=( $( curl -fsSL 'https://api.github.com/repos/osm-search/Nominatim/tags' |tac|tac| \
 	grep -oE '[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+' | \
@@ -133,13 +133,28 @@ for latest in "${latests[@]}"; do
 				s/%%EXTRA%%/'"${extra[$version]}"'/g;
 			' "$dir/Dockerfile"
 
+			# Create a list of "alias" tags for DockerHub post_push
+			if [ "$latest" = 'master' ]; then
+				export DOCKER_TAG="$variant"
+			else
+				export DOCKER_TAG="$latest-$variant"
+			fi
+			echo "${DOCKER_TAG} " > "$dir/.dockertags"
+
 			# Add Travis-CI env var
 			travisEnv='\n    - VERSION='"$version"' VARIANT='"$variant$travisEnv"
 
 			if [[ "$1" == 'build' ]]; then
-				tag="$version-$variant"
-				echo "Build Dockerfile for ${tag}"
-				docker build -t "${dockerRepo}:${tag}" "$dir"
+				export DOCKER_TAG="$latest-$variant"
+				export IMAGE_NAME=${DOCKER_REPO}:${DOCKER_TAG}
+				export DOCKERFILE_PATH=Dockerfile
+				cd "$dir"
+				echo "Build Dockerfile for ${DOCKER_TAG}"
+				./hooks/build
+				echo "Test docker image for ${DOCKER_TAG}"
+				docker-compose -f docker-compose.test.yml up sut
+				docker-compose -f docker-compose.test.yml down
+				cd -
 			fi
 		done
 	fi

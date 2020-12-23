@@ -27,7 +27,7 @@ if [ ! -f "${OSMFILE}" ] || [ ! -d "${PGDATA}" ]; then
         exit 1
     fi
 
-    log "Starting download of OSM map '${OSMFILE}'..."
+    log "Starting download of OSM map '${OSMFILE}' at '${OSMDOWNLOAD}'..."
     curl -q -L -o "${OSMFILE}" "${OSMDOWNLOAD}"
     log "Download OSM map '${OSMFILE}' finished."
 
