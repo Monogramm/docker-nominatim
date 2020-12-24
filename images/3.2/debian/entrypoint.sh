@@ -102,9 +102,9 @@ init_postgres() {
         exit 1
     fi
 
-    log "Starting initialization of OSM database (this may take hours or days)..."
+    log "Initialization of OSM database..."
     sh /app/init.sh "/data/${NOMINATIM_MAP_NAME}" "${NOMINATIM_DB_PATH}" "${NOMINATIM_INIT_THREADS:-$(nproc)}" "${GEOFABRIK_DOWNLOAD_URL}"
-    log "Initialization of initialization of OSM database finished."
+    log "Initialization of OSM database finished."
 
     if [ -d "/data/${NOMINATIM_DB_PATH}" ]; then
         log "Link OSM database to Postgres ${POSTGRES_VERSION} main directory..."
@@ -178,11 +178,11 @@ startapache() {
 
 # init / update application
 init_version() {
-    # Check version
-    if [ ! -f "./.docker-version" ]; then
-        log "Nominatim init to $(cat /app/src/.docker-version)..."
-    elif ! cmp --silent "./.docker-version" "/app/src/.docker-version"; then
-        log "Nominatim update from $(cat ./.docker-version) to $(cat /app/src/.docker-version)..."
+    # Check app version persisted in data for auto-update
+    if [ ! -f "/data/.docker-app-version" ]; then
+        log "Nominatim init to $(cat /app/src/.docker-app-version)..."
+    elif ! cmp --silent "/data/.docker-app-version" "/app/src/.docker-app-version"; then
+        log "Nominatim update from $(cat ./.docker-app-version) to $(cat /app/src/.docker-app-version)..."
 
         if [ -n "${NOMINATIM_DB_PATH}" ] && [ -d "/data/${NOMINATIM_DB_PATH}" ]; then
             sudo -u postgres /app/src/build/utils/update.php --init-updates
@@ -190,7 +190,7 @@ init_version() {
         fi
     fi
 
-    cp -p "/app/src/.docker-version" "./.docker-version"
+    cp -p "/app/src/.docker-app-version" "/data/.docker-app-version"
 }
 
 # start application

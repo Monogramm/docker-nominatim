@@ -19,6 +19,7 @@ services:
       - nominatim_internal_network
     volumes_from:
       - nominatim
+      - nominatim-db
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
@@ -96,4 +97,4 @@ services:
       #- NOMINATIM_INIT_THREADS=4
       - NOMINATIM_MAP_NAME=monaco-latest.osm.pbf
       - NOMINATIM_DB_PATH=monaco-latest-postgres
-      - GEOFABRIK_DOWNLOAD_URL=http://download.geofabrik.de/europe/monaco-latest.osm.pbf
+      - GEOFABRIK_DOWNLOAD_URL=https://download.geofabrik.de/europe/monaco-latest.osm.pbf

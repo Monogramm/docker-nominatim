@@ -13,7 +13,8 @@ OSMDOWNLOAD=${4:-${GEOFABRIK_DOWNLOAD_URL}}
 
 export PGDATA=/data/${PGDIR}
 
-if [ ! -f "${OSMFILE}" ] || [ ! -d "${PGDATA}" ]; then
+# If no map, or database not initialized or initialized with different DB version
+if [ ! -f "${OSMFILE}" ] || [ ! -f "${PGDATA}/.docker-data-version" ] || ! cmp --silent "${PGDATA}/.docker-data-version" "/app/src/.docker-data-version"; then
     rm -rf "${PGDATA}"
     mkdir -p "${PGDATA}"
 
@@ -27,14 +28,20 @@ if [ ! -f "${OSMFILE}" ] || [ ! -d "${PGDATA}" ]; then
         exit 1
     fi
 
-    log "Starting download of OSM map '${OSMFILE}'..."
+    log "Starting download of OSM map '${OSMFILE}' at '${OSMDOWNLOAD}'..."
     curl -q -L -o "${OSMFILE}" "${OSMDOWNLOAD}"
     log "Download OSM map '${OSMFILE}' finished."
 
     touch "${OSMFILE}.todo"
 
+else
+
+    log "Initialization of database already performed for OSM map '${OSMFILE}'."
+    exit 0
+
 fi
 
+log "Starting initialization of OSM database with map '${OSMFILE}' (this may take hours or days)..."
 chown postgres:postgres "${PGDATA}"
 
 if [ -f "${OSMFILE}.todo" ]; then
@@ -60,8 +67,9 @@ fi
 
 if ! id -u "${NOMINATIM_DB_USER}"; then
     log "Creating system user '${NOMINATIM_DB_USER}'..."
-
     useradd -m -p "${NOMINATIM_DB_PASSWD}" "${NOMINATIM_DB_USER}"
+
+    log "Setting permissions to user '${NOMINATIM_DB_USER}'..."
     chown -R "${NOMINATIM_DB_USER}:${NOMINATIM_DB_USER}" ./src
 
     log "Creation of system user '${NOMINATIM_DB_USER}' finished."
@@ -81,6 +89,9 @@ if [ -f ./src/build/utils/check_import_finished.php ]; then
     log "Check of import finished."
 fi
 
-log "Stoping database..."
+log "Stopping database..."
 sudo -u postgres "/usr/lib/postgresql/${POSTGRES_VERSION}/bin/pg_ctl" -D "${PGDATA}" stop
 sudo chown -R postgres:postgres "${PGDATA}"
+
+log "Flag database version..."
+cp -p "/app/src/.docker-data-version" "${PGDATA}/.docker-data-version"

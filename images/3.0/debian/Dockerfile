@@ -1,24 +1,21 @@
-FROM ubuntu:xenial
+FROM ubuntu:xenial AS build
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    LANG=C.UTF-8 \
-    POSTGRES_VERSION=9.5 \
-    POSTGIS_VERSION=2.2 \
-    NOMINATIM_VERSION=v3.0.1 \
-    NOMINATIM_INIT_THREADS= \
-    GEOFABRIK_DOWNLOAD_URL= \
-    GEOFABRIK_REPLICATION_URL= \
-    NOMINATIM_MAP_NAME= \
-    NOMINATIM_DB_PATH= \
-    NOMINATIM_DB_DRIVER=pgsql \
-    NOMINATIM_DB_HOST=localhost \
-    NOMINATIM_DB_PORT=5432 \
-    NOMINATIM_DB_NAME=nominatim \
-    NOMINATIM_DB_USER=nominatim \
-    NOMINATIM_DB_PASSWD=password1234
+ARG DEBIAN_FRONTEND=noninteractive
+ARG LANG=C.UTF-8
+ARG POSTGRES_VERSION=9.5
+ARG POSTGIS_VERSION=2.2
+ARG NOMINATIM_VERSION=v3.0.1
 
+# Do not start daemons after installation.
 # Add requirements
+# Configure postgres
+# Osmium install to run continuous updates
+# Nominatim install
+# Remove development and unused packages
+# Clear temporary files and directories
 RUN set -ex; \
+    echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d; \
+    chmod +x /usr/sbin/policy-rc.d; \
     apt-get update -y -qq; \
     apt-get install -y --allow-unauthenticated \
         locales \
@@ -62,25 +59,49 @@ RUN set -ex; \
     rm -rf \
         /tmp/* \
         /var/tmp/* \
-    ;
-
-WORKDIR /app
-
-# Configure postgres
-# Osmium install to run continuous updates
-# Nominatim install
-RUN set -ex; \
+    ; \
     echo "host all  all    0.0.0.0/0  trust" >> "/etc/postgresql/${POSTGRES_VERSION}/main/pg_hba.conf"; \
     echo "listen_addresses='*'" >> "/etc/postgresql/${POSTGRES_VERSION}/main/postgresql.conf"; \
     pip3 install osmium; \
-    git clone --recursive https://github.com/openstreetmap/Nominatim ./src; \
-    cd ./src; \
+    git clone \
+        --config advice.detachedHead=false \
+        --single-branch \
+        --branch $NOMINATIM_VERSION \
+        --depth 1 \
+        --recursive \
+        https://github.com/openstreetmap/Nominatim \
+        /app/src\
+    ; \
+    cd /app/src; \
     git checkout "tags/$NOMINATIM_VERSION"; \
     git submodule update --recursive --init; \
     mkdir build; \
     cd build; \
     cmake ..; \
-    make -j`nproc`
+    make -j`nproc`; \
+    chmod o=rwx .; \
+    apt-get -y remove --purge --allow-remove-essential \
+        cpp-9 \
+        gcc-9* \
+        g++ \
+        git \
+        make \
+        cmake \
+        llvm-10* \
+        libc6-dev \
+        linux-libc-dev \
+        libclang-*-dev \
+        build-essential \
+        "postgresql-server-dev-${POSTGRES_VERSION}" \
+    ; \
+    apt-get clean; \
+    rm -rf \
+        /tmp/* \
+        /var/tmp/* \
+        /root/.cache \
+        /app/src/.git \
+        /var/lib/apt/lists/* \
+        "/var/lib/postgresql/${POSTGRES_VERSION}/main"/*
 
 # Apache configure
 COPY local.php /app/src/build/settings/local.php
@@ -106,11 +127,7 @@ RUN set -ex; \
     sed -i \
         -e "s|@define('CONST_Postgresql_Version', '.*');|@define('CONST_Postgresql_Version', '${POSTGRES_VERSION}');|g" \
         -e "s|@define('CONST_Postgis_Version', '.*');|@define('CONST_Postgis_Version', '${POSTGIS_VERSION}');//|g" \
-        /app/src/build/settings/local.php; \
-    chmod o=rwx /app/src/build
-
-EXPOSE 5432
-EXPOSE 8080
+        /app/src/build/settings/local.php
 
 COPY entrypoint.sh start.sh startapache.sh startpostgres.sh init.sh /app/
 
@@ -124,19 +141,44 @@ RUN set -ex; \
         /app/init.sh \
     ;
 
+# Keep track of image version
+RUN set -ex; \
+    echo "${NOMINATIM_VERSION} ${VCS_REF} ${BUILD_DATE}" > '/app/src/.docker-app-version'; \
+    echo "${POSTGRES_VERSION} ${POSTGIS_VERSION}" > '/app/src/.docker-data-version'
+
+# Collapse image to single layer.
+FROM scratch
+
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["start"]
 
 VOLUME [ "/data" ]
 
+WORKDIR /app
+
+EXPOSE 5432
+EXPOSE 8080
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    POSTGRES_VERSION=9.5 \
+    POSTGIS_VERSION=2.2 \
+    NOMINATIM_VERSION=v3.0.1 \
+    NOMINATIM_INIT_THREADS= \
+    GEOFABRIK_DOWNLOAD_URL= \
+    GEOFABRIK_REPLICATION_URL= \
+    NOMINATIM_MAP_NAME= \
+    NOMINATIM_DB_PATH= \
+    NOMINATIM_DB_DRIVER=pgsql \
+    NOMINATIM_DB_HOST=localhost \
+    NOMINATIM_DB_PORT=5432 \
+    NOMINATIM_DB_NAME=nominatim \
+    NOMINATIM_DB_USER=nominatim \
+    NOMINATIM_DB_PASSWD=password1234
+
 # Arguments to label built container
 ARG VCS_REF
 ARG BUILD_DATE
-
-# Keep track of image version
-RUN set -ex; \
-    echo "${NOMINATIM_VERSION} ${VCS_REF} ${BUILD_DATE}" > '/app/src/.docker-version'; \
-    echo "${NOMINATIM_VERSION}" > '/app/src/.app-version'
 
 # Container labels (http://label-schema.org/)
 # Container annotations (https://github.com/opencontainers/image-spec)
@@ -161,3 +203,5 @@ LABEL maintainer="Monogramm maintainers <opensource at monogramm dot io>" \
       org.opencontainers.image.vendor="osm-search" \
       org.opencontainers.image.version=$NOMINATIM_VERSION \
       org.opencontainers.image.authors="Monogramm maintainers <opensource at monogramm dot io>"
+
+COPY --from=build / /

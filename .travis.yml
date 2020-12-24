@@ -80,3 +80,4 @@ env: # Environments
     - VERSION=3.3 VARIANT=debian
     - VERSION=3.4 VARIANT=debian
     - VERSION=3.5 VARIANT=debian
+    - VERSION=3.6 VARIANT=debian

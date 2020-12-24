@@ -15,10 +15,11 @@ declare -A ubuntu=(
 	[2.5]='trusty'
 	[3.0]='xenial'
 	[3.1]='xenial'
-	[3.2]='cosmic'
-	[3.3]='disco'
-	[3.4]='eoan'
+	[3.2]='bionic'
+	[3.3]='bionic'
+	[3.4]='focal'
 	[3.5]='focal'
+	[3.6]='focal'
 )
 
 declare -A extra=(
@@ -29,16 +30,18 @@ declare -A extra=(
 	[3.3]=''
 	[3.4]='"postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts"'
 	[3.5]='"postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts"'
+	[3.6]='"postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts"'
 )
 
 declare -A postgres=(
 	[2.5]='9.3'
 	[3.0]='9.5'
 	[3.1]='9.5'
-	[3.2]='10'
+	[3.2]='11'
 	[3.3]='11'
-	[3.4]='11'
+	[3.4]='12'
 	[3.5]='12'
+	[3.6]='12'
 )
 
 declare -A postgis=(
@@ -47,8 +50,9 @@ declare -A postgis=(
 	[3.1]='2.2'
 	[3.2]='2.4'
 	[3.3]='2.5'
-	[3.4]='2.5'
+	[3.4]='3'
 	[3.5]='3'
+	[3.6]='3'
 )
 
 variants=(
@@ -64,7 +68,7 @@ function version_greater_or_equal() {
 	[[ "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1" || "$1" == "$2" ]];
 }
 
-dockerRepo="monogramm/docker-nominatim"
+DOCKER_REPO="monogramm/docker-nominatim"
 # Retrieve automatically the latest versions
 latests=( $( curl -fsSL 'https://api.github.com/repos/osm-search/Nominatim/tags' |tac|tac| \
 	grep -oE '[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+' | \
@@ -129,13 +133,29 @@ for latest in "${latests[@]}"; do
 				s/%%EXTRA%%/'"${extra[$version]}"'/g;
 			' "$dir/Dockerfile"
 
+			# Create a list of "alias" tags for DockerHub post_push
+			if [ "$latest" = 'master' ]; then
+				export DOCKER_TAG="$variant"
+			else
+				export DOCKER_TAG="$latest-$variant"
+			fi
+			echo "${DOCKER_TAG} " > "$dir/.dockertags"
+
 			# Add Travis-CI env var
 			travisEnv='\n    - VERSION='"$version"' VARIANT='"$variant$travisEnv"
 
 			if [[ "$1" == 'build' ]]; then
-				tag="$version-$variant"
-				echo "Build Dockerfile for ${tag}"
-				docker build -t "${dockerRepo}:${tag}" "$dir"
+				export DOCKER_TAG="$latest-$variant"
+				export IMAGE_NAME=${DOCKER_REPO}:${DOCKER_TAG}
+				export DOCKERFILE_PATH=Dockerfile
+				cd "$dir"
+				echo "Build Dockerfile for ${DOCKER_TAG}"
+				./hooks/build
+				echo "Test docker image for ${DOCKER_TAG}"
+				./hooks/pre_test
+				docker-compose -f docker-compose.test.yml up sut
+				docker-compose -f docker-compose.test.yml down
+				cd -
 			fi
 		done
 	fi
