@@ -13,7 +13,8 @@ OSMDOWNLOAD=${4:-${GEOFABRIK_DOWNLOAD_URL}}
 
 export PGDATA=/data/${PGDIR}
 
-if [ ! -f "${OSMFILE}" ] || [ ! -d "${PGDATA}" ]; then
+# If no map, or database not initialized or initialized with different DB version
+if [ ! -f "${OSMFILE}" ] || [ ! -f "${PGDATA}/.docker-data-version" ] || ! cmp --silent "${PGDATA}/.docker-data-version" "/app/src/.docker-data-version"; then
     rm -rf "${PGDATA}"
     mkdir -p "${PGDATA}"
 
@@ -88,6 +89,9 @@ if [ -f ./src/build/utils/check_import_finished.php ]; then
     log "Check of import finished."
 fi
 
-log "Stoping database..."
+log "Stopping database..."
 sudo -u postgres "/usr/lib/postgresql/${POSTGRES_VERSION}/bin/pg_ctl" -D "${PGDATA}" stop
 sudo chown -R postgres:postgres "${PGDATA}"
+
+log "Flag database version..."
+cp -p "/app/src/.docker-data-version" "${PGDATA}/.docker-data-version"

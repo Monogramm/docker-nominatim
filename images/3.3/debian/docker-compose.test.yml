@@ -19,6 +19,7 @@ services:
       - nominatim_internal_network
     volumes_from:
       - nominatim
+      - nominatim-db
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro

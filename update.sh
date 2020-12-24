@@ -152,6 +152,7 @@ for latest in "${latests[@]}"; do
 				echo "Build Dockerfile for ${DOCKER_TAG}"
 				./hooks/build
 				echo "Test docker image for ${DOCKER_TAG}"
+				./hooks/pre_test
 				docker-compose -f docker-compose.test.yml up sut
 				docker-compose -f docker-compose.test.yml down
 				cd -

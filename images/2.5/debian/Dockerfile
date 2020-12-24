@@ -1,21 +1,10 @@
 FROM ubuntu:trusty AS build
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    LANG=C.UTF-8 \
-    POSTGRES_VERSION=9.3 \
-    POSTGIS_VERSION=2.1 \
-    NOMINATIM_VERSION=v2.5.1 \
-    NOMINATIM_INIT_THREADS= \
-    GEOFABRIK_DOWNLOAD_URL= \
-    GEOFABRIK_REPLICATION_URL= \
-    NOMINATIM_MAP_NAME= \
-    NOMINATIM_DB_PATH= \
-    NOMINATIM_DB_DRIVER=pgsql \
-    NOMINATIM_DB_HOST=localhost \
-    NOMINATIM_DB_PORT=5432 \
-    NOMINATIM_DB_NAME=nominatim \
-    NOMINATIM_DB_USER=nominatim \
-    NOMINATIM_DB_PASSWD=password1234
+ARG DEBIAN_FRONTEND=noninteractive
+ARG LANG=C.UTF-8
+ARG POSTGRES_VERSION=9.3
+ARG POSTGIS_VERSION=2.1
+ARG NOMINATIM_VERSION=v2.5.1
 
 # Do not start daemons after installation.
 # Add requirements
@@ -154,8 +143,8 @@ RUN set -ex; \
 
 # Keep track of image version
 RUN set -ex; \
-    echo "${NOMINATIM_VERSION} ${VCS_REF} ${BUILD_DATE}" > '/app/src/.docker-version'; \
-    echo "${NOMINATIM_VERSION}" > '/app/src/.app-version'
+    echo "${NOMINATIM_VERSION} ${VCS_REF} ${BUILD_DATE}" > '/app/src/.docker-app-version'; \
+    echo "${POSTGRES_VERSION} ${POSTGIS_VERSION}" > '/app/src/.docker-data-version'
 
 # Collapse image to single layer.
 FROM scratch
@@ -169,6 +158,23 @@ WORKDIR /app
 
 EXPOSE 5432
 EXPOSE 8080
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    POSTGRES_VERSION=9.3 \
+    POSTGIS_VERSION=2.1 \
+    NOMINATIM_VERSION=v2.5.1 \
+    NOMINATIM_INIT_THREADS= \
+    GEOFABRIK_DOWNLOAD_URL= \
+    GEOFABRIK_REPLICATION_URL= \
+    NOMINATIM_MAP_NAME= \
+    NOMINATIM_DB_PATH= \
+    NOMINATIM_DB_DRIVER=pgsql \
+    NOMINATIM_DB_HOST=localhost \
+    NOMINATIM_DB_PORT=5432 \
+    NOMINATIM_DB_NAME=nominatim \
+    NOMINATIM_DB_USER=nominatim \
+    NOMINATIM_DB_PASSWD=password1234
 
 # Arguments to label built container
 ARG VCS_REF
