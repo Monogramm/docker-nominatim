@@ -13,8 +13,10 @@ branches:
 
 before_install:
   - env | sort
+  - dir="images/${VERSION}/${VARIANT}"
 
 install:
+  - cd "$dir"
   # Execute CI build hooks
   - ./hooks/run build "${VARIANT}"
 
@@ -26,6 +28,7 @@ before_script:
   #- sudo wget -O '/srv/nominatim/data/monaco-latest.osm.pbf' 'http://download.geofabrik.de/europe/monaco-latest.osm.pbf'
 
 script:
+  - cd "$dir"
   # Execute CI test hooks
   - ./hooks/run test "${VARIANT}"
 
@@ -49,3 +52,4 @@ env: # Environments
     - VERSION=3.4 VARIANT=debian
     - VERSION=3.5 VARIANT=debian
     - VERSION=3.6 VARIANT=debian
+    - VERSION=3.7 VARIANT=debian
