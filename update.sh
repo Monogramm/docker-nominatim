@@ -20,6 +20,7 @@ declare -A ubuntu=(
 	[3.4]='focal'
 	[3.5]='focal'
 	[3.6]='focal'
+	[3.7]='focal'
 )
 
 declare -A extra=(
@@ -31,6 +32,7 @@ declare -A extra=(
 	[3.4]='"postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts"'
 	[3.5]='"postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts"'
 	[3.6]='"postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts"'
+	[3.7]='"postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts"'
 )
 
 declare -A postgres=(
@@ -42,6 +44,7 @@ declare -A postgres=(
 	[3.4]='12'
 	[3.5]='12'
 	[3.6]='12'
+	[3.7]='12'
 )
 
 declare -A postgis=(
@@ -53,6 +56,7 @@ declare -A postgis=(
 	[3.4]='3'
 	[3.5]='3'
 	[3.6]='3'
+	[3.7]='3'
 )
 
 variants=(
@@ -61,7 +65,8 @@ variants=(
 )
 
 min_version='2.5'
-dockerLatest='1.4'
+dockerLatest='3.7'
+dockerDefaultVariant='debian'
 
 
 # version_greater_or_equal A B returns whether A >= B
@@ -74,15 +79,6 @@ dockerRepo="monogramm/docker-nominatim"
 latests=( $( curl -fsSL 'https://api.github.com/repos/osm-search/Nominatim/tags' |tac|tac| \
 	grep -oE '[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+' | \
 	sort -urV ) )
-#latests=(
-#	2.5
-#	3.0
-#	3.1
-#	3.2
-#	3.3
-#	3.4
-#	3.5
-#)
 
 # Remove existing images
 echo "reset docker images"
@@ -140,12 +136,19 @@ for latest in "${latests[@]}"; do
 			' "$dir/hooks/run"
 
 			# Create a list of "alias" tags for DockerHub post_push
-			if [ "$latest" = "$dockerLatest" ]; then
-				export DOCKER_TAG="$variant"
+			if [ "$version" = "$dockerLatest" ]; then
+				if [ "$variant" = "$dockerDefaultVariant" ]; then
+					echo "$latest-$variant $version-$variant $variant $latest $version latest " > "$dir/.dockertags"
+				else
+					echo "$latest-$variant $version-$variant $variant " > "$dir/.dockertags"
+				fi
 			else
-				export DOCKER_TAG="$latest-$variant"
+				if [ "$variant" = "$dockerDefaultVariant" ]; then
+					echo "$latest-$variant $version-$variant $latest $version " > "$dir/.dockertags"
+				else
+					echo "$latest-$variant $version-$variant " > "$dir/.dockertags"
+				fi
 			fi
-			echo "${DOCKER_TAG} " > "$dir/.dockertags"
 
 			# Add Travis-CI env var
 			travisEnv='\n    - VERSION='"$version"' VARIANT='"$variant$travisEnv"

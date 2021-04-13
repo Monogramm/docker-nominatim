@@ -1,9 +1,9 @@
-FROM ubuntu: AS build
+FROM ubuntu:focal AS build
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG LANG=C.UTF-8
-ARG POSTGRES_VERSION=
-ARG POSTGIS_VERSION=
+ARG POSTGRES_VERSION=12
+ARG POSTGIS_VERSION=3
 ARG NOMINATIM_VERSION=v3.7.0
 
 # Do not start daemons after installation.
@@ -38,7 +38,7 @@ RUN set -ex; \
         "postgresql-server-dev-${POSTGRES_VERSION}" \
         "postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}" \
         postgresql-contrib \
-         \
+        "postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts" \
         apache2 \
         php \
         php-pgsql \
@@ -161,8 +161,8 @@ EXPOSE 8080
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
-    POSTGRES_VERSION= \
-    POSTGIS_VERSION= \
+    POSTGRES_VERSION=12 \
+    POSTGIS_VERSION=3 \
     NOMINATIM_VERSION=v3.7.0 \
     NOMINATIM_INIT_THREADS= \
     GEOFABRIK_DOWNLOAD_URL= \
