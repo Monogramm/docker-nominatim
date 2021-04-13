@@ -3,5 +3,13 @@
 # See documentation for details:
 # https://docs.docker.com/docker-hub/builds/advanced/
 
-# FIXME Manually download OSM map
-#wget -O '/srv/nominatim/data/monaco-latest.osm.pbf' 'http://download.geofabrik.de/europe/monaco-latest.osm.pbf'
+if [ ! -f '.env' ]; then
+    echo 'Init docker compose environment variables...'
+    cp .env_template .env.tmp
+
+    mv .env.tmp .env
+fi
+
+#echo 'Preparing persisted data...'
+#mkdir -p "${APP_HOME:-/srv/nominatim}"
+#chown 777 "${APP_HOME:-/srv/nominatim}"

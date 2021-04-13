@@ -61,6 +61,7 @@ variants=(
 )
 
 min_version='2.5'
+dockerLatest='1.4'
 
 
 # version_greater_or_equal A B returns whether A >= B
@@ -68,7 +69,7 @@ function version_greater_or_equal() {
 	[[ "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1" || "$1" == "$2" ]];
 }
 
-DOCKER_REPO="monogramm/docker-nominatim"
+dockerRepo="monogramm/docker-nominatim"
 # Retrieve automatically the latest versions
 latests=( $( curl -fsSL 'https://api.github.com/repos/osm-search/Nominatim/tags' |tac|tac| \
 	grep -oE '[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+' | \
@@ -133,8 +134,13 @@ for latest in "${latests[@]}"; do
 				s/%%EXTRA%%/'"${extra[$version]}"'/g;
 			' "$dir/Dockerfile"
 
+			sed -ri -e '
+				s|DOCKER_TAG=.*|DOCKER_TAG='"$version"'|g;
+				s|DOCKER_REPO=.*|DOCKER_REPO='"$dockerRepo"'|g;
+			' "$dir/hooks/run"
+
 			# Create a list of "alias" tags for DockerHub post_push
-			if [ "$latest" = 'master' ]; then
+			if [ "$latest" = "$dockerLatest" ]; then
 				export DOCKER_TAG="$variant"
 			else
 				export DOCKER_TAG="$latest-$variant"
