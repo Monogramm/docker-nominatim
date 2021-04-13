@@ -7,59 +7,27 @@ language: shell
 
 branches:
   only:
+    - main
     - master
     - develop
 
 before_install:
   - env | sort
-  - home="$(pwd)"
-  - dir="${home}/images/${VERSION}/${VARIANT}"
-  - export TAG=travis
-  - export VCS_REF=`git rev-parse --short HEAD`
-  - export BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
-  - export IMAGE_NAME=monogramm/docker-nominatim:travis-ci
 
 install:
-  - cd "$dir"
-  # Test containers build
-  - docker-compose -f docker-compose.test.yml build
+  # Execute CI build hooks
+  - ./hooks/run build "${VARIANT}"
 
 before_script:
+  # Display docker images
   - docker images
   # FIXME Manually download OSM map
   #- sudo mkdir -p '/srv/nominatim/data/'
   #- sudo wget -O '/srv/nominatim/data/monaco-latest.osm.pbf' 'http://download.geofabrik.de/europe/monaco-latest.osm.pbf'
 
 script:
-  - cd "$dir"
-  # Test containers run
-  - travis_retry docker-compose -f docker-compose.test.yml up -d
-  - docker-compose -f docker-compose.test.yml logs -f "sut"
-  - docker-compose -f docker-compose.test.yml ps
-  - docker-compose -f docker-compose.test.yml logs "nominatim-db"
-  - docker-compose -f docker-compose.test.yml ps "nominatim-db" | grep "Up"
-  - docker-compose -f docker-compose.test.yml logs "nominatim"
-  - docker-compose -f docker-compose.test.yml ps "nominatim" | grep "Up"
-  - docker-compose -f docker-compose.test.yml ps "sut" | grep "Exit 0"
-  # Test containers can be restarted
-  - docker-compose -f docker-compose.test.yml restart
-  - docker-compose -f docker-compose.test.yml logs -f "sut"
-  - docker-compose -f docker-compose.test.yml ps
-  - docker-compose -f docker-compose.test.yml logs "nominatim-db"
-  - docker-compose -f docker-compose.test.yml ps "nominatim-db" | grep "Up"
-  - docker-compose -f docker-compose.test.yml logs "nominatim"
-  - docker-compose -f docker-compose.test.yml ps "nominatim" | grep "Up"
-  - docker-compose -f docker-compose.test.yml ps "sut" | grep "Exit 0"
-  # Test containers can be dropped
-  - docker-compose -f docker-compose.test.yml down
-  - travis_retry docker-compose -f docker-compose.test.yml up -d
-  - docker-compose -f docker-compose.test.yml logs -f "sut"
-  - docker-compose -f docker-compose.test.yml ps
-  - docker-compose -f docker-compose.test.yml logs "nominatim-db"
-  - docker-compose -f docker-compose.test.yml ps "nominatim-db" | grep "Up"
-  - docker-compose -f docker-compose.test.yml logs "nominatim"
-  - docker-compose -f docker-compose.test.yml ps "nominatim" | grep "Up"
-  - docker-compose -f docker-compose.test.yml ps "sut" | grep "Exit 0"
+  # Execute CI test hooks
+  - ./hooks/run test "${VARIANT}"
 
 notifications:
   email: false
