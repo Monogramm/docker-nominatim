@@ -26,8 +26,11 @@ Open Source search based on OpenStreetMap data
 
 [Dockerhub monogramm/docker-nominatim](https://hub.docker.com/r/monogramm/docker-nominatim/)
 
--   `3.5` `latest`
--   `3.4`
+Tags:
+-   `images/3.7/debian/Dockerfile`: 3.7.0-debian 3.7-debian debian 3.7.0 3.7 latest <!--+tags-->
+-   `images/3.6/debian/Dockerfile`: 3.6.0-debian 3.6-debian 3.6.0 3.6 <!--+tags-->
+-   `images/3.5/debian/Dockerfile`: 3.5.2-debian 3.5-debian 3.5.2 3.5 <!--+tags-->
+-   `images/3.4/debian/Dockerfile`: 3.4.2-debian 3.4-debian 3.4.2 3.4 <!--+tags-->
 
 ## How to run this image
 
