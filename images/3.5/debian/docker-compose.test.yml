@@ -4,6 +4,9 @@ networks:
   nominatim_external_network:
   nominatim_internal_network:
 
+volumes:
+  nominatim_data:
+
 services:
   # https://docs.docker.com/docker-hub/builds/automated-testing/
   sut:
@@ -30,8 +33,7 @@ services:
       context: ./
       dockerfile: Dockerfile
       args: 
-        - TAG=${TAG}
-        - VCS_REF=${VCS_REF}
+        - VCS_REF=${SOURCE_COMMIT}
         - BUILD_DATE=${BUILD_DATE}
     image: ${IMAGE_NAME}
     container_name: nominatim
@@ -59,12 +61,13 @@ services:
       - nominatim_internal_network
       - nominatim_external_network
     volumes:
-      - $NOMINATIM_HOME/data:/data
+      - nominatim_data:/data
+      #- $NOMINATIM_HOME/data:/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     environment:
-      - GEOFABRIK_DOWNLOAD_URL=http://download.geofabrik.de/europe/monaco-latest.osm.pbf
-      - GEOFABRIK_REPLICATION_URL=http://download.geofabrik.de/europe/monaco-updates
+      - PBF_URL=http://download.geofabrik.de/europe/monaco-latest.osm.pbf
+      - REPLICATION_URL=http://download.geofabrik.de/europe/monaco-updates
       # Wait 1 minute before checking DB
       - WAIT_STEP=60
       # Timeout after 1 day of waiting DB (init can be very long...)
@@ -90,11 +93,16 @@ services:
     networks:
       - nominatim_internal_network
     volumes:
-      - $NOMINATIM_HOME/data:/data
+      - nominatim_data:/data
+      #- $NOMINATIM_HOME/data:/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     environment:
       #- NOMINATIM_INIT_THREADS=4
       - NOMINATIM_MAP_NAME=monaco-latest.osm.pbf
       - NOMINATIM_DB_PATH=monaco-latest-postgres
-      - GEOFABRIK_DOWNLOAD_URL=https://download.geofabrik.de/europe/monaco-latest.osm.pbf
+      - PBF_URL=https://download.geofabrik.de/europe/monaco-latest.osm.pbf
+      - IMPORT_WIKIPEDIA=true
+      - IMPORT_GB_POSTCODES=true
+      - IMPORT_US_POSTCODES=true
+      - IMPORT_COUNTRY_GRID=true
