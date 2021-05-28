@@ -3,7 +3,7 @@
 set -e
 
 echo "Waiting to ensure everything is fully ready for the tests..."
-sleep 420
+sleep 1200
 
 echo "Checking main containers are reachable..."
 if ! ping -c 10 -q nominatim-db ; then

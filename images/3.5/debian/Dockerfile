@@ -4,15 +4,12 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG LANG=C.UTF-8
 ARG POSTGRES_VERSION=12
 ARG POSTGIS_VERSION=3
-ARG NOMINATIM_VERSION=v3.5.2
+ARG NOMINATIM_VERSION=3.5.2
 
 # Do not start daemons after installation.
 # Add requirements
 # Configure postgres
 # Osmium install to run continuous updates
-# Nominatim install
-# Remove development and unused packages
-# Clear temporary files and directories
 RUN set -ex; \
     echo '#!/bin/sh\nexit 101' > /usr/sbin/policy-rc.d; \
     chmod +x /usr/sbin/policy-rc.d; \
@@ -41,15 +38,20 @@ RUN set -ex; \
         "postgresql-${POSTGRES_VERSION}-postgis-${POSTGIS_VERSION}-scripts" \
         apache2 \
         php \
+        php-cgi \
         php-pgsql \
         libapache2-mod-php \
         php-intl \
-        python3-setuptools \
         python3-dev \
         python3-pip \
-        python3-psycopg2 \
         python3-tidylib \
-        git \
+        python3-psycopg2 \
+        python3-setuptools \
+        python3-dotenv \
+        python3-psutil \
+        python3-jinja2 \
+        python3-icu git \
+        python3-argparse-manpage \
         curl \
         sudo \
         netcat \
@@ -62,23 +64,27 @@ RUN set -ex; \
     ; \
     echo "host all  all    0.0.0.0/0  trust" >> "/etc/postgresql/${POSTGRES_VERSION}/main/pg_hba.conf"; \
     echo "listen_addresses='*'" >> "/etc/postgresql/${POSTGRES_VERSION}/main/postgresql.conf"; \
-    pip3 install osmium; \
-    git clone \
-        --config advice.detachedHead=false \
-        --single-branch \
-        --branch $NOMINATIM_VERSION \
-        --depth 1 \
-        --recursive \
-        https://github.com/openstreetmap/Nominatim \
-        /app/src\
-    ; \
-    cd /app/src; \
-    git checkout "tags/$NOMINATIM_VERSION"; \
-    git submodule update --recursive --init; \
-    mkdir build; \
-    cd build; \
-    cmake ..; \
+    pip3 install osmium
+
+WORKDIR /app
+
+# Nominatim download
+RUN set -ex; \
+    curl "https://nominatim.org/release/Nominatim-$NOMINATIM_VERSION.tar.bz2" -o /tmp/nominatim.tar.bz2; \
+    tar -xf /tmp/nominatim.tar.bz2 -C ./; \
+    rm -f /tmp/nominatim.tar.bz2; \
+    mv ./Nominatim-$NOMINATIM_VERSION ./src; \
+    mkdir ./src/build
+
+WORKDIR /app/src/build
+
+# Nominatim install
+# Remove development and unused packages
+# Clear temporary files and directories
+RUN set -ex; \
+    cmake ../; \
     make -j`nproc`; \
+    make install; \
     chmod o=rwx .; \
     apt-get -y remove --purge --allow-remove-essential \
         cpp-9 \
@@ -108,22 +114,7 @@ COPY local.php /app/src/build/settings/local.php
 COPY nominatim-apache.conf /etc/apache2/sites-enabled/000-default.conf
 
 # Load initial data
-ARG with_postcodes_gb
-ARG with_postcodes_us
 RUN set -ex; \
-    if [ "$with_postcodes_gb" = "" ]; then \
-        echo "Skipping optional GB postcode file"; \
-    else \
-        echo "Downloading optional GB postcode file"; \
-        curl http://www.nominatim.org/data/gb_postcode_data.sql.gz > /app/src/data/gb_postcode_data.sql.gz; \
-    fi; \
-    if [ "$with_postcodes_us" = "" ]; then \
-        echo "Skipping optional US postcode file"; \
-    else \
-        echo "Downloading optional US postcode file"; \
-        curl http://www.nominatim.org/data/us_postcode_data.sql.gz > /app/src/data/us_postcode_data.sql.gz; \
-    fi; \
-    curl http://www.nominatim.org/data/country_grid.sql.gz > /app/src/data/country_osm_grid.sql.gz; \
     sed -i \
         -e "s|@define('CONST_Postgresql_Version', '.*');|@define('CONST_Postgresql_Version', '${POSTGRES_VERSION}');|g" \
         -e "s|@define('CONST_Postgis_Version', '.*');|@define('CONST_Postgis_Version', '${POSTGIS_VERSION}');//|g" \
@@ -152,8 +143,6 @@ FROM scratch
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["start"]
 
-VOLUME [ "/data" ]
-
 WORKDIR /app
 
 EXPOSE 5432
@@ -163,10 +152,10 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
     POSTGRES_VERSION=12 \
     POSTGIS_VERSION=3 \
-    NOMINATIM_VERSION=v3.5.2 \
+    NOMINATIM_VERSION=3.5.2 \
     NOMINATIM_INIT_THREADS= \
-    GEOFABRIK_DOWNLOAD_URL= \
-    GEOFABRIK_REPLICATION_URL= \
+    PBF_URL= \
+    REPLICATION_URL= \
     NOMINATIM_MAP_NAME= \
     NOMINATIM_DB_PATH= \
     NOMINATIM_DB_DRIVER=pgsql \

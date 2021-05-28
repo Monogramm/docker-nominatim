@@ -9,7 +9,7 @@ set -e
 # Functions
 
 log() {
-    echo "[$0] [$(date +%Y-%m-%dT%H:%M:%S%:z)] $@"
+    echo "[$0] [$(date +%Y-%m-%dT%H:%M:%S%:z)] $*"
 }
 
 # wait for file/directory to exists
@@ -103,7 +103,7 @@ init_postgres() {
     fi
 
     log "Initialization of OSM database..."
-    sh /app/init.sh "/data/${NOMINATIM_MAP_NAME}" "${NOMINATIM_DB_PATH}" "${NOMINATIM_INIT_THREADS:-$(nproc)}" "${GEOFABRIK_DOWNLOAD_URL}"
+    sh /app/init.sh "/data/${NOMINATIM_MAP_NAME}" "${NOMINATIM_DB_PATH}" "${NOMINATIM_INIT_THREADS:-$(nproc)}" "${PBF_URL:-$GEOFABRIK_DOWNLOAD_URL}"
     log "Initialization of OSM database finished."
 
     if [ -d "/data/${NOMINATIM_DB_PATH}" ]; then
@@ -121,7 +121,7 @@ init_config() {
         cp '/app/src/build/settings/local.php' '/data'
     fi
 
-    if [ -z "${GEOFABRIK_REPLICATION_URL}" ]; then
+    if [ -z "${REPLICATION_URL:-$GEOFABRIK_REPLICATION_URL}" ]; then
         log "Removing Nominatim replication URL..."
         sed -i \
             -e "s|@define('CONST_Replication_Url', '.*');|//@define('CONST_Replication_Url', '');//|g" \
@@ -129,7 +129,9 @@ init_config() {
     else
         log "Setting Nominatim replication URL..."
         sed -i \
-            -e "s|@define('CONST_Replication_Url', '.*');|@define('CONST_Replication_Url', '${GEOFABRIK_REPLICATION_URL}');//|g" \
+            -e "s|@define('CONST_Replication_Url', '.*');|@define('CONST_Replication_Url', '${REPLICATION_URL:-$GEOFABRIK_REPLICATION_URL}');//|g" \
+            -e "s|@define('CONST_Replication_Update_Interval', '.*');|@define('CONST_Replication_Update_Interval', '${REPLICATION_UPDATE_INTERVAL:-86400}');//|g" \
+            -e "s|@define('CONST_Replication_Recheck_Interval', '.*');|@define('CONST_Replication_Recheck_Interval', '${REPLICATION_RECHECK_INTERVAL:-900}');//|g" \
             '/data/local.php'
     fi
 
@@ -141,12 +143,27 @@ init_config() {
     else
         log "Setting Nominatim Database DSN..."
         sed -i \
-            -e "s|//@define('CONST_Database_DSN', '.*');|@define('CONST_Database_DSN', '${NOMINATIM_DB_DRIVER}:host=${NOMINATIM_DB_HOST};port=${NOMINATIM_DB_PORT};user=${NOMINATIM_DB_USER};password=${NOMINATIM_DB_PASSWD};dbname=${NOMINATIM_DB_NAME}');//|g" \
+            -e "s|//@define('CONST_Database_DSN', '.*');|@define('CONST_Database_DSN', '${NOMINATIM_DB_DRIVER}:host=${NOMINATIM_DB_HOST};port=${NOMINATIM_DB_PORT:-5432};user=${NOMINATIM_DB_USER};password=${NOMINATIM_DB_PASSWD};dbname=${NOMINATIM_DB_NAME}');//|g" \
             '/data/local.php'
     fi
 
     log "Updating custom Nominatim config..."
     cp /data/local.php /app/src/build/settings/local.php
+
+    if [ -f ./src/build/nominatim ]; then
+        # Starting Nominatim 3.7+
+        log "Refresing Nominatim website using CLI..."
+        nominatim refresh --project-dir /app/src/build/ --website
+        if [ -n "${NOMINATIM_DB_HOST}" ] && ! [ "${NOMINATIM_DB_HOST}" = 'localhost' ]; then
+            log "Setting Nominatim Database DSN in website API..."
+            sed -i \
+                -e "s|@define('CONST_Database_DSN', '.*');|@define('CONST_Database_DSN', '${NOMINATIM_DB_DRIVER}:host=${NOMINATIM_DB_HOST};port=${NOMINATIM_DB_PORT:-5432};user=${NOMINATIM_DB_USER};password=${NOMINATIM_DB_PASSWD};dbname=${NOMINATIM_DB_NAME}');//|g" \
+                /app/src/build/website/*.php
+        fi
+    else
+        log "Setup Nominatim website using local config..."
+        php /app/src/build/utils/setup.php --setup-website
+    fi
 }
 
 startstandalone() {

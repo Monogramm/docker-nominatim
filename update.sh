@@ -124,7 +124,7 @@ for latest in "${latests[@]}"; do
 			# Replace the variables.
 			sed -ri -e '
 				s/%%VARIANT%%/-'"$variant"'/g;
-				s/%%VERSION%%/v'"$latest"'/g;
+				s/%%VERSION%%/'"$latest"'/g;
 				s/%%UBUNTU_VERSION%%/'"${ubuntu[$version]}"'/g;
 				s/%%POSTGRES_VERSION%%/'"${postgres[$version]}"'/g;
 				s/%%POSTGIS_VERSION%%/'"${postgis[$version]}"'/g;
@@ -158,16 +158,11 @@ for latest in "${latests[@]}"; do
 			readmeTags="$readmeTags\n-   \`$dir/Dockerfile\`: $(cat $dir/.dockertags)<!--+tags-->"
 
 			if [[ "$1" == 'build' ]]; then
-				export DOCKER_TAG="$latest-$variant"
-				export IMAGE_NAME=${DOCKER_REPO}:${DOCKER_TAG}
-				export DOCKERFILE_PATH=Dockerfile
 				cd "$dir"
 				echo "Build Dockerfile for ${DOCKER_TAG}"
-				./hooks/build
+				./hooks/run build
 				echo "Test docker image for ${DOCKER_TAG}"
-				./hooks/pre_test
-				docker-compose -f docker-compose.test.yml up sut
-				docker-compose -f docker-compose.test.yml down
+				./hooks/run test
 				cd -
 			fi
 		done
