@@ -162,7 +162,7 @@ init_config() {
         fi
     else
         log "Setup Nominatim website using local config..."
-        php /app/src/build/utils/setup.php --setup-websites
+        php /app/src/build/utils/setup.php --setup-website
     fi
 }
 
