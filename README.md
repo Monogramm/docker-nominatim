@@ -42,10 +42,10 @@ It manages map downloads from Geofabrik and NOMINATIM extraction/pre-processing/
 NOMINATIM_INIT_THREADS=2
 
 ## Geofabrik URL to download map
-GEOFABRIK_DOWNLOAD_URL=http://download.geofabrik.de/europe/monaco-latest.osm.pbf
+PBF_URL=http://download.geofabrik.de/europe/monaco-latest.osm.pbf
 
 ## Geofabrik URL to update map
-GEOFABRIK_REPLICATION_URL=http://download.geofabrik.de/europe/monaco-updates
+REPLICATION_URL=http://download.geofabrik.de/europe/monaco-updates
 
 ## Geofabrik map relative file path
 NOMINATIM_MAP_NAME=monaco-latest.osm.pbf
